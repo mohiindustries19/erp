@@ -19,22 +19,19 @@ git add .
 git commit -m "Ready for Railway deployment"
 
 -------------------------------------------
-STEP 3: CREATE GITHUB REPO
+STEP 3: GITHUB REPO (ALREADY CREATED)
 -------------------------------------------
 
-1. Go to: https://github.com/new
-2. Repository name: mohi-erp
-3. Private repository (recommended)
-4. Don't initialize with README
-5. Click "Create repository"
+Your GitHub repository:
+https://github.com/mohiindustries19/erp.git
+
+✅ Repository already exists!
 
 -------------------------------------------
 STEP 4: PUSH TO GITHUB
 -------------------------------------------
 
-Replace YOUR_USERNAME with your GitHub username:
-
-git remote add origin https://github.com/YOUR_USERNAME/mohi-erp.git
+git remote add origin https://github.com/mohiindustries19/erp.git
 git branch -M main
 git push -u origin main
 

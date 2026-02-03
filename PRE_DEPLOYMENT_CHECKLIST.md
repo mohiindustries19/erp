@@ -83,9 +83,9 @@ Prepare these values before deployment:
 
 ## 📦 GitHub Repository
 
-- [ ] Create GitHub repository
-  - Repository name: `mohi-erp`
-  - Visibility: Private (recommended)
+- [x] Create GitHub repository
+  - Repository: https://github.com/mohiindustries19/erp.git
+  - ✅ Already created!
 
 - [ ] Initialize git
   ```bash
@@ -105,7 +105,7 @@ Prepare these values before deployment:
 
 - [ ] Add remote
   ```bash
-  git remote add origin https://github.com/YOUR_USERNAME/mohi-erp.git
+  git remote add origin https://github.com/mohiindustries19/erp.git
   ```
 
 - [ ] Push to GitHub

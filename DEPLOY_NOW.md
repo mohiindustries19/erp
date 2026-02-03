@@ -20,10 +20,8 @@ git add .
 # Commit
 git commit -m "Ready for Railway deployment"
 
-# Create GitHub repo and push
-# Go to github.com → New Repository → Create "mohi-erp"
-# Then:
-git remote add origin https://github.com/YOUR_USERNAME/mohi-erp.git
+# Push to your GitHub repository
+git remote add origin https://github.com/mohiindustries19/erp.git
 git branch -M main
 git push -u origin main
 ```

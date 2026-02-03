@@ -77,8 +77,8 @@ Mohi Industries ERP is a comprehensive enterprise resource planning system desig
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/mohi-erp.git
-cd mohi-erp
+git clone https://github.com/mohiindustries19/erp.git
+cd erp
 
 # Create virtual environment
 python -m venv venv

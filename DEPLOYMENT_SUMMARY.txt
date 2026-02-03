@@ -40,7 +40,7 @@
       git init
       git add .
       git commit -m "Ready for Railway"
-      git remote add origin https://github.com/YOUR_USERNAME/mohi-erp.git
+      git remote add origin https://github.com/mohiindustries19/erp.git
       git push -u origin main
 
   2️⃣  DEPLOY ON RAILWAY
