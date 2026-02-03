@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt - {{ payment.payment_number }} - Mohi Industries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #ffffff;
+            background: #000000;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #d00000;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            color: #d00000;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 16pt;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .receipt-number {
+            font-size: 14pt;
+            color: #d00000;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-cleared {
+            background: #00ff00;
+            color: #000000;
+        }
+
+        .status-pending {
+            background: #ffaa00;
+            color: #000000;
+        }
+
+        .status-bounced {
+            background: #ff0000;
+            color: #ffffff;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            border: 2px solid #d00000;
+            padding: 15px;
+        }
+
+        .info-title {
+            color: #d00000;
+            font-weight: bold;
+            font-size: 10pt;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #d00000;
+            padding-bottom: 5px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .info-label {
+            color: #999999;
+            font-size: 10pt;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .amount-section {
+            background: #d00000;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .amount-label {
+            font-size: 12pt;
+            margin-bottom: 10px;
+        }
+
+        .amount-value {
+            font-size: 32pt;
+            font-weight: bold;
+        }
+
+        .details-section {
+            border: 1px solid #333333;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .details-title {
+            color: #d00000;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 15px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            padding: 10px;
+            background: #1a1a1a;
+        }
+
+        .detail-label {
+            color: #d00000;
+            font-size: 9pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #ffffff;
+            font-size: 11pt;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666666;
+            font-size: 9pt;
+            border-top: 1px solid #333333;
+            padding-top: 10px;
+        }
+
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #666666;
+            margin-top: 50px;
+            padding-top: 10px;
+            color: #999999;
+            font-size: 10pt;
+        }
+
+        @media print {
+            body {
+                background: #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MOHI INDUSTRIES</h1>
+        <h2>Payment Receipt</h2>
+        <div class="receipt-number">{{ payment.payment_number }}</div>
+        <div class="status-badge status-{{ payment.status }}">
+            {{ payment.status|upper }}
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-box">
+            <div class="info-title">Customer Information</div>
+            <div class="info-row">
+                <span class="info-label">Business Name:</span>
+                <span class="info-value">{{ payment.order.distributor.business_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Contact Person:</span>
+                <span class="info-value">{{ payment.order.distributor.contact_person or '-' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">{{ payment.order.distributor.phone }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">City:</span>
+                <span class="info-value">{{ payment.order.distributor.city }}</span>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">Order Information</div>
+            <div class="info-row">
+                <span class="info-label">Order Number:</span>
+                <span class="info-value">{{ payment.order.order_number }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Order Date:</span>
+                <span class="info-value">{{ payment.order.order_date.strftime('%d-%m-%Y') }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Order Amount:</span>
+                <span class="info-value">₹{{ "%.2f"|format(payment.order.total_amount) }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Payment Status:</span>
+                <span class="info-value">{{ payment.order.payment_status|upper }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="amount-section">
+        <div class="amount-label">AMOUNT RECEIVED</div>
+        <div class="amount-value">₹{{ "%.2f"|format(payment.amount) }}</div>
+    </div>
+
+    <div class="details-section">
+        <div class="details-title">PAYMENT DETAILS</div>
+        <div class="details-grid">
+            <div class="detail-item">
+                <div class="detail-label">Payment Date</div>
+                <div class="detail-value">{{ payment.payment_date.strftime('%d-%m-%Y') }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Payment Mode</div>
+                <div class="detail-value">{{ payment.payment_mode|upper }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Reference Number</div>
+                <div class="detail-value">{{ payment.reference_number or '-' }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Bank Name</div>
+                <div class="detail-value">{{ payment.bank_name or '-' }}</div>
+            </div>
+            {% if payment.cheque_date %}
+            <div class="detail-item">
+                <div class="detail-label">Cheque Date</div>
+                <div class="detail-value">{{ payment.cheque_date.strftime('%d-%m-%Y') }}</div>
+            </div>
+            {% endif %}
+            {% if payment.clearance_date %}
+            <div class="detail-item">
+                <div class="detail-label">Clearance Date</div>
+                <div class="detail-value">{{ payment.clearance_date.strftime('%d-%m-%Y') }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% if payment.remarks %}
+        <div style="margin-top: 15px; padding: 10px; background: #1a1a1a;">
+            <div class="detail-label">Remarks</div>
+            <div class="detail-value">{{ payment.remarks }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">Received By</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Authorized Signatory</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | Mohi Industries ERP<br>
+        <span style="font-size: 8pt;">This is a computer-generated receipt and does not require a signature</span>
+    </div>
+</body>
+</html>

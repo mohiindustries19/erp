@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Payment - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Edit Payment - {{ payment.payment_number }}</h2>
+    <p class="text-gray-600 dark:text-gray-400">Update payment details</p>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+    <form method="POST" action="{{ url_for('payment.edit_payment', id=payment.id) }}">
+        <div class="mb-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded border border-gray-100 dark:border-gray-600">
+            <p class="text-gray-700 dark:text-gray-300"><strong>Order:</strong> <span
+                    class="text-gray-900 dark:text-white">{{ payment.order.order_number }}</span></p>
+            <p class="text-gray-700 dark:text-gray-300"><strong>Distributor:</strong> <span
+                    class="text-gray-900 dark:text-white">{{ payment.order.distributor.business_name }}</span></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Payment Date *
+                </label>
+                <input type="date" name="payment_date" required value="{{ payment.payment_date.strftime('%Y-%m-%d') }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Amount *
+                </label>
+                <input type="number" name="amount" min="0.01" step="0.01" required value="{{ payment.amount }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Payment Mode *
+                </label>
+                <select name="payment_mode" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    <option value="cash" {% if payment.payment_mode=='cash' %}selected{% endif %}>Cash</option>
+                    <option value="cheque" {% if payment.payment_mode=='cheque' %}selected{% endif %}>Cheque</option>
+                    <option value="bank_transfer" {% if payment.payment_mode=='bank_transfer' %}selected{% endif %}>Bank
+                        Transfer</option>
+                    <option value="upi" {% if payment.payment_mode=='upi' %}selected{% endif %}>UPI</option>
+                    <option value="card" {% if payment.payment_mode=='card' %}selected{% endif %}>Card</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Status *
+                </label>
+                <select name="status" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    <option value="cleared" {% if payment.status=='cleared' %}selected{% endif %}>Cleared</option>
+                    <option value="pending" {% if payment.status=='pending' %}selected{% endif %}>Pending</option>
+                    <option value="bounced" {% if payment.status=='bounced' %}selected{% endif %}>Bounced</option>
+                    <option value="cancelled" {% if payment.status=='cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Reference Number
+                </label>
+                <input type="text" name="reference_number" value="{{ payment.reference_number or '' }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Bank Name
+                </label>
+                <input type="text" name="bank_name" value="{{ payment.bank_name or '' }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Cheque Date
+                </label>
+                <input type="date" name="cheque_date"
+                    value="{{ payment.cheque_date.strftime('%Y-%m-%d') if payment.cheque_date else '' }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                Remarks
+            </label>
+            <textarea name="remarks" rows="3"
+                class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">{{ payment.remarks or '' }}</textarea>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('payment.list_payments') }}"
+                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-gray-600 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-blue-600 dark:hover:bg-blue-700">
+                Update Payment
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

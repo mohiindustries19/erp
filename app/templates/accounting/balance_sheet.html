@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Balance Sheet - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+{% set _as_on = as_on_date() if as_on_date is callable else as_on_date %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Balance Sheet</h1>
+        <div class="flex space-x-2">
+            <form method="POST" action="{{ url_for('accounting.email_balance_sheet') }}" class="flex items-center space-x-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="as_on_date" value="{{ _as_on.strftime('%Y-%m-%d') if _as_on and _as_on.strftime is defined else _as_on }}">
+                <input type="email" name="email" placeholder="Email (optional)" class="px-3 py-2 border border-gray-300 rounded text-sm w-56" />
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                    ✉️ Email
+                </button>
+            </form>
+            <a href="{{ url_for('accounting.export_balance_sheet_excel', as_on_date=_as_on) }}" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                📊 Export Excel
+            </a>
+            <a href="{{ url_for('accounting.print_balance_sheet', as_on_date=_as_on) }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                🖨️ Print
+            </a>
+            <a href="{{ url_for('accounting.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                ← Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Selection -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <form method="GET" class="flex items-end gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">As on Date</label>
+                <input type="date" name="as_on_date" value="{{ _as_on }}" 
+                       class="px-4 py-2 border border-gray-300 rounded">
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition">
+                Generate Report
+            </button>
+        </form>
+    </div>
+
+    <!-- Balance Sheet -->
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800">Mohi Industries</h2>
+            <p class="text-gray-600">Balance Sheet</p>
+            <p class="text-sm text-gray-500">As on: {{ _as_on.strftime('%d-%m-%Y') if _as_on and _as_on.strftime is defined else _as_on }}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Side: Assets -->
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">ASSETS</h3>
+                <table class="w-full">
+                    {% for item in assets %}
+                    <tr class="border-b border-gray-200">
+                        <td class="py-2 text-sm text-gray-700">{{ item.account.name or item.account.account_name }}</td>
+                        <td class="py-2 text-right text-sm font-semibold">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-slate-50 font-bold">
+                        <td class="py-3 text-gray-800">Total Assets</td>
+                        <td class="py-3 text-right text-slate-900">₹{{ "%.2f"|format(total_assets) }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Right Side: Liabilities & Equity -->
+            <div>
+                <!-- Liabilities -->
+                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">LIABILITIES</h3>
+                <table class="w-full mb-6">
+                    {% for item in liabilities %}
+                    <tr class="border-b border-gray-200">
+                        <td class="py-2 text-sm text-gray-700">{{ item.account.name or item.account.account_name }}</td>
+                        <td class="py-2 text-right text-sm font-semibold">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-slate-50 font-bold">
+                        <td class="py-3 text-gray-800">Total Liabilities</td>
+                        <td class="py-3 text-right text-slate-900">₹{{ "%.2f"|format(total_liabilities) }}</td>
+                    </tr>
+                </table>
+
+                <!-- Equity -->
+                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">EQUITY</h3>
+                <table class="w-full">
+                    {% for item in equity %}
+                    <tr class="border-b border-gray-200">
+                        <td class="py-2 text-sm text-gray-700">{{ item.account.name or item.account.account_name }}</td>
+                        <td class="py-2 text-right text-sm font-semibold">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-slate-50 font-bold">
+                        <td class="py-3 text-gray-800">Total Equity</td>
+                        <td class="py-3 text-right text-slate-900">₹{{ "%.2f"|format(total_equity) }}</td>
+                    </tr>
+                </table>
+
+                <!-- Total Liabilities + Equity -->
+                <table class="w-full mt-4 border-t-2 border-gray-800">
+                    <tr class="bg-slate-100 font-bold">
+                        <td class="py-3 text-gray-800">Total Liabilities + Equity</td>
+                        <td class="py-3 text-right text-gray-800">₹{{ "%.2f"|format(total_liabilities + total_equity) }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="mt-8 text-center">
+            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded transition">
+                Print Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    nav, footer, button, form { display: none !important; }
+    .bg-white { box-shadow: none !important; }
+}
+</style>
+{% endblock %}

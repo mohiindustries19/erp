@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Add Batch - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Add New Batch</h2>
+    <p class="text-gray-600 dark:text-gray-400">Create a new batch for FSSAI compliance tracking</p>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+    <form method="POST" action="{{ url_for('inventory.add_batch') }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Batch Number *
+                </label>
+                <input type="text" name="batch_number" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                    placeholder="BATCH-2024-001">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Product *
+                </label>
+                <select name="product_id" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    <option value="">Select Product</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}">{{ product.sku }} - {{ product.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Manufacturing Date *
+                </label>
+                <input type="date" name="manufacturing_date" required value="{{ today }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Expiry Date *
+                </label>
+                <input type="date" name="expiry_date" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Quantity Produced *
+                </label>
+                <input type="number" name="quantity_produced" min="1" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Warehouse *
+                </label>
+                <select name="warehouse_id" required
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    <option value="">Select Warehouse</option>
+                    {% for warehouse in warehouses %}
+                    <option value="{{ warehouse.id }}">{{ warehouse.code }} - {{ warehouse.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    QC Status
+                </label>
+                <select name="qc_status"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    <option value="pending">Pending</option>
+                    <option value="passed">Passed</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('inventory.list_batches') }}"
+                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-gray-600 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-green-600 dark:hover:bg-green-700">
+                Add Batch
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

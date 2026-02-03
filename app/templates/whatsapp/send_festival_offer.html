@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Send Festival Offer - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Festival Offer</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Send offer details to selected distributors</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('whatsapp.dashboard') }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">← Back</a>
+        </div>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Offer Details</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input type="text" name="title" required class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-200" placeholder="e.g., New Year Offer">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Valid From</label>
+                    <input type="date" name="valid_from" value="{{ today }}" required class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-200">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Valid To</label>
+                    <input type="date" name="valid_to" value="{{ today }}" required class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-200">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Terms (optional)</label>
+                    <input type="text" name="terms" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-200" placeholder="e.g., While stocks last">
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                <textarea name="description" rows="4" required class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-200" placeholder="Offer details... (discounts, bundle, etc)"></textarea>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Select Distributors</h2>
+                <button type="button" id="offerToggleAll" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">Select all</button>
+            </div>
+
+            <div class="max-h-[420px] overflow-auto rounded-lg border border-gray-100 dark:border-dark-border">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                    <thead class="bg-gray-50 dark:bg-dark-bg">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Send</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Distributor</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">City</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
+                        {% for dist in distributors %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-dark-bg/50">
+                            <td class="px-4 py-3">
+                                <input type="checkbox" class="offer-checkbox" name="distributor_ids" value="{{ dist.id }}">
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
+                                <div class="font-semibold">{{ dist.business_name }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ dist.contact_person or '' }}</div>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ dist.city }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ dist.phone }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end pt-5">
+                <button type="submit" class="px-5 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors" onclick="return confirm('Send this offer to selected distributors?');">
+                    Send Offer
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        const toggle = document.getElementById('offerToggleAll');
+        const boxes = () => Array.from(document.querySelectorAll('.offer-checkbox'));
+        function allChecked() {
+            const b = boxes();
+            return b.length > 0 && b.every((x) => x.checked);
+        }
+        function update() {
+            toggle.textContent = allChecked() ? 'Clear all' : 'Select all';
+        }
+        toggle?.addEventListener('click', () => {
+            const target = !allChecked();
+            boxes().forEach((x) => (x.checked = target));
+            update();
+        });
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('offer-checkbox')) update();
+        });
+        update();
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Churn Prediction - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Customer Churn Prediction</h1>
+            <p class="text-gray-600 mt-2">Identify at-risk customers and take proactive action</p>
+        </div>
+        <a href="{{ url_for('advanced_analytics.dashboard') }}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+            Back to Analytics
+        </a>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="bg-white rounded-lg shadow p-12 text-center">
+        <div class="text-sm text-gray-500 mb-4">Loading...</div>
+        <p class="text-gray-600">Analyzing customer behavior patterns...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden bg-red-50 border-l-4 border-red-500 p-6 rounded">
+        <p class="text-red-800" id="errorMessage"></p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Total Analyzed</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1" id="totalAnalyzed">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">High Risk</p>
+                <p class="text-2xl font-bold text-red-600 mt-1" id="highRisk">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Medium Risk</p>
+                <p class="text-2xl font-bold text-yellow-600 mt-1" id="mediumRisk">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Action Required</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1" id="actionRequired">-</p>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="border-b">
+                <div class="flex space-x-1 p-4">
+                    <button onclick="filterRisk('all')" 
+                            class="risk-tab px-4 py-2 rounded transition bg-blue-500 text-white" 
+                            data-risk="all">
+                        All Customers
+                    </button>
+                    <button onclick="filterRisk('High')" 
+                            class="risk-tab px-4 py-2 rounded transition text-gray-700 hover:bg-gray-100" 
+                            data-risk="High">
+                        High Risk
+                    </button>
+                    <button onclick="filterRisk('Medium')" 
+                            class="risk-tab px-4 py-2 rounded transition text-gray-700 hover:bg-gray-100" 
+                            data-risk="Medium">
+                        Medium Risk
+                    </button>
+                    <button onclick="filterRisk('Low')" 
+                            class="risk-tab px-4 py-2 rounded transition text-gray-700 hover:bg-gray-100" 
+                            data-risk="Low">
+                        Low Risk
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictions Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold text-gray-800">Customer Risk Analysis</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Risk Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Churn Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Days Since Order</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Frequency</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Orders</th>
+                        </tr>
+                    </thead>
+                    <tbody id="predictionsTable" class="divide-y divide-gray-200">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allPredictions = [];
+
+function loadPredictions() {
+    fetch('/advanced-analytics/api/churn-prediction')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').classList.add('hidden');
+            
+            if (!data.success) {
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = data.error;
+                return;
+            }
+            
+            allPredictions = data.data.predictions;
+            displayPredictions(data.data);
+        })
+        .catch(error => {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = 'Failed to load predictions: ' + error.message;
+        });
+}
+
+function displayPredictions(data) {
+    document.getElementById('results').classList.remove('hidden');
+    
+    // Update summary cards
+    document.getElementById('totalAnalyzed').textContent = data.total_analyzed;
+    document.getElementById('highRisk').textContent = data.high_risk_count;
+    document.getElementById('mediumRisk').textContent = data.medium_risk_count;
+    document.getElementById('actionRequired').textContent = data.high_risk_count + data.medium_risk_count;
+    
+    // Display all predictions
+    renderTable(data.predictions);
+}
+
+function renderTable(predictions) {
+    const tbody = document.getElementById('predictionsTable');
+    tbody.innerHTML = '';
+    
+    predictions.forEach(pred => {
+        const riskColor = pred.risk_level === 'High' ? 'red' : 
+                         pred.risk_level === 'Medium' ? 'yellow' : 'green';
+        
+        tbody.innerHTML += `
+            <tr>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">${pred.business_name}</td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-${riskColor}-100 text-${riskColor}-800">
+                        ${pred.risk_level}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${pred.churn_score}/100</td>
+                <td class="px-6 py-4 text-sm text-gray-600">${pred.days_since_last_order} days</td>
+                <td class="px-6 py-4 text-sm text-gray-600">${pred.order_frequency}/month</td>
+                <td class="px-6 py-4 text-sm text-gray-600">${pred.payment_score}%</td>
+                <td class="px-6 py-4 text-sm text-gray-600">${pred.total_orders}</td>
+            </tr>
+        `;
+    });
+}
+
+function filterRisk(riskLevel) {
+    // Update tab styles
+    document.querySelectorAll('.risk-tab').forEach(tab => {
+        if (tab.dataset.risk === riskLevel) {
+            tab.className = 'risk-tab px-4 py-2 rounded transition bg-blue-500 text-white';
+        } else {
+            tab.className = 'risk-tab px-4 py-2 rounded transition text-gray-700 hover:bg-gray-100';
+        }
+    });
+    
+    // Filter predictions
+    const filtered = riskLevel === 'all' ? 
+        allPredictions : 
+        allPredictions.filter(p => p.risk_level === riskLevel);
+    
+    renderTable(filtered);
+}
+
+// Load predictions on page load
+window.addEventListener('load', () => {
+    loadPredictions();
+});
+</script>
+{% endblock %}

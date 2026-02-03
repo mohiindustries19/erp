@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Accounting Dashboard - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Accounting Dashboard</h1>
+        <div class="space-x-2">
+            <a href="{{ url_for('accounting.chart_of_accounts') }}"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition">
+                General Ledger
+            </a>
+            <a href="{{ url_for('accounting.add_expense') }}"
+                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition">
+                + Add Expense
+            </a>
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <a href="{{ url_for('accounting.rebuild_ledger_admin') }}"
+                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                Rebuild Ledger
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Today's Transactions -->
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide mb-2">Today's Transactions</p>
+            <p class="text-3xl font-bold text-gray-800">{{ today_entries }}</p>
+        </div>
+
+        <!-- Month Income -->
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide mb-2">This Month Income</p>
+            <p class="text-3xl font-bold text-green-600">₹{{ "%.2f"|format(month_income) }}</p>
+        </div>
+
+        <!-- Month Expenses -->
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide mb-2">This Month Expenses</p>
+            <p class="text-3xl font-bold text-red-600">₹{{ "%.2f"|format(month_expenses) }}</p>
+        </div>
+
+        <!-- Pending Approvals -->
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide mb-2">Pending Expenses</p>
+            <p class="text-3xl font-bold text-yellow-600">{{ pending_expenses }}</p>
+        </div>
+    </div>
+
+    <!-- Cash & Bank Balances -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <h3 class="text-lg font-semibold mb-2 uppercase tracking-wide">Cash Balance</h3>
+            <p class="text-4xl font-bold">₹{{ "%.2f"|format(cash_balance) }}</p>
+        </div>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <h3 class="text-lg font-semibold mb-2 uppercase tracking-wide">Bank Balance</h3>
+            <p class="text-4xl font-bold">₹{{ "%.2f"|format(bank_balance) }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ url_for('accounting.opening_balances') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Opening Balances</div>
+            </a>
+            <a href="{{ url_for('accounting.list_receipts') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Receipts</div>
+            </a>
+            <a href="{{ url_for('accounting.list_sales') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Sales</div>
+            </a>
+            <a href="{{ url_for('accounting.list_expenses') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Expenses</div>
+            </a>
+            <a href="{{ url_for('accounting.ledger') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Ledger</div>
+            </a>
+            <a href="{{ url_for('accounting.trial_balance') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Trial Balance</div>
+            </a>
+            <a href="{{ url_for('accounting.ar_aging') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">AR Aging</div>
+            </a>
+            <a href="{{ url_for('accounting.ap_aging') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">AP Aging</div>
+            </a>
+            <a href="{{ url_for('accounting.profit_loss') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">P&L Statement</div>
+            </a>
+            <a href="{{ url_for('accounting.balance_sheet') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">Balance Sheet</div>
+            </a>
+            <a href="{{ url_for('accounting.chart_of_accounts') }}"
+                class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg text-center transition border border-gray-300">
+                <div class="font-semibold text-white">General Ledger</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

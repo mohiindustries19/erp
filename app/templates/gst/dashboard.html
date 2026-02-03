@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}GST Dashboard - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-gray-900">GST Dashboard</h2>
+    <p class="text-gray-500 mt-1">Provider: {{ provider }} | Sandbox: {{ 'Yes' if sandbox else 'No' }}</p>
+</div>
+
+<div class="bg-white rounded-xl shadow-soft p-6 border border-gray-100 mb-6">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <div class="text-sm text-gray-500">Company GSTIN</div>
+            <div class="text-lg font-semibold text-gray-900">{{ (company.gstin if company else '') or 'Not set' }}</div>
+            <div class="text-sm text-gray-500">State Code: {{ (company.state_code if company else '') or '-' }}</div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a class="bg-gray-100 border rounded-lg px-4 py-2 hover:bg-gray-200" target="_blank" href="{{ certificate_url }}">GST Certificate</a>
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <a class="bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-gray-900" href="{{ url_for('gst.settings') }}">Settings</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-soft p-6 border border-gray-100 mb-6">
+    {% if configured %}
+    <div class="text-green-700">GST API is configured.</div>
+    {% else %}
+    <div class="text-red-700">GST API is not configured. Add GST_API_KEY in .env.</div>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <a class="bg-white border rounded-lg p-4 hover:bg-gray-50" href="{{ url_for('gst.validate_gstin') }}">Validate GSTIN</a>
+    <a class="bg-white border rounded-lg p-4 hover:bg-gray-50" href="{{ url_for('gst.einvoice') }}">Generate e-Invoice</a>
+    <a class="bg-white border rounded-lg p-4 hover:bg-gray-50" href="{{ url_for('gst.eway_bill') }}">Generate e-Way Bill</a>
+    <a class="bg-white border rounded-lg p-4 hover:bg-gray-50" href="{{ url_for('gst.gstr1') }}">File GSTR-1</a>
+    <a class="bg-white border rounded-lg p-4 hover:bg-gray-50" href="{{ url_for('gst.gstr3b') }}">File GSTR-3B</a>
+    <a class="bg-white border rounded-lg p-4 hover:bg-gray-50" href="{{ url_for('gst.reconcile_2b') }}">Reconcile 2B</a>
+</div>
+{% endblock %}

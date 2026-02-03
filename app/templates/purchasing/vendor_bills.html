@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Bills - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Vendor Bills</h2>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Track supplier invoices</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="{{ url_for('purchasing.export_vendor_bills_excel') }}"
+            class="px-4 py-2 bg-emerald-500 text-white rounded-lg shadow hover:bg-emerald-600 transition-colors">📊 Export Excel</a>
+        <a href="{{ url_for('purchasing.list_vendors') }}"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Vendors</a>
+        <a href="{{ url_for('purchasing.list_purchase_orders') }}"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Purchase
+            Orders</a>
+        <a href="{{ url_for('purchasing.add_vendor_bill') }}"
+            class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg shadow hover:bg-primary-700 transition-colors">
+            New Vendor Bill
+        </a>
+    </div>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none border border-gray-100 dark:border-dark-border overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+            <thead class="bg-gray-50 dark:bg-dark-bg">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                        Bill Number</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                        Vendor</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                        Date</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                        Status</th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                        Total</th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
+                {% for bill in bills %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-200">{{ bill.bill_number }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ bill.vendor.business_name }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{
+                        bill.bill_date.strftime('%Y-%m-%d') }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span
+                            class="px-2 py-1 rounded text-xs font-medium {% if bill.status == 'paid' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% elif bill.status == 'pending' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300{% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                            {{ bill.status|capitalize }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-right font-mono text-gray-900 dark:text-gray-200">₹{{
+                        "%.2f"|format(bill.total_amount) }}</td>
+                    <td class="px-4 py-3 text-right text-sm">
+                        <a href="{{ url_for('purchasing.view_vendor_bill', id=bill.id) }}"
+                            class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 font-medium">View</a>
+                        <a href="{{ url_for('purchasing.edit_vendor_bill', id=bill.id) }}"
+                            class="ml-3 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if bills|length == 0 %}
+                <tr>
+                    <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">No vendor bills
+                        found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

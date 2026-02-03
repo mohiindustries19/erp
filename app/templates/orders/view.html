@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order.order_number }} - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">Order {{ order.order_number }}</h2>
+            <p class="text-gray-600">Order details and invoice</p>
+        </div>
+        <div class="space-x-2">
+            <a href="{{ url_for('orders.print_invoice', id=order.id) }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded inline-block">
+                🖨️ Print Invoice
+            </a>
+            <a href="{{ url_for('orders.export_pdf', id=order.id) }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded inline-block">
+                📄 Export PDF
+            </a>
+            <a href="{{ url_for('orders.export_excel', id=order.id) }}" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded inline-block">
+                📊 Export Excel
+            </a>
+            <button onclick="showEmailModal()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded inline-block">
+                📧 Send Email
+            </button>
+            <a href="{{ url_for('orders.edit_order', id=order.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded inline-block">
+                Edit Order
+            </a>
+
+            {% if order.status != 'cancelled' and order.status != 'delivered' %}
+            <form method="POST" action="{{ url_for('orders.cancel_order', id=order.id) }}" class="inline"
+                onsubmit="return confirm('Cancel order {{ order.order_number }}?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded inline-block">
+                    Cancel
+                </button>
+            </form>
+            {% endif %}
+
+            {% if order.status in ['draft', 'cancelled'] %}
+            <form method="POST" action="{{ url_for('orders.delete_order', id=order.id) }}" class="inline"
+                onsubmit="return confirm('Delete order {{ order.order_number }}? This cannot be undone.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded inline-block">
+                    Delete
+                </button>
+            </form>
+            {% endif %}
+
+            <a href="{{ url_for('orders.list_orders') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded inline-block">
+                ← Back to Orders
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow p-8">
+    <!-- Invoice Header -->
+    <div class="border-b-2 border-gray-300 pb-6 mb-6">
+        <div class="flex justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-600">MOHI INDUSTRIES</h1>
+                <p class="text-sm text-gray-600 mt-2">
+                    4-1, Plot No G-2, Industrial Area Road<br>
+                    Hajipur Industrial Area<br>
+                    Hajipur, Bihar 844102<br>
+                    Phone: +91 9262650010<br>
+                    Email: info@mohiindustries.in
+                </p>
+                <p class="text-sm text-gray-600 mt-2">
+                    <strong>GSTIN:</strong> 10GANPS5418H1ZJ<br>
+                    <strong>FSSAI:</strong> 10423110000282
+                </p>
+            </div>
+            <div class="text-right">
+                <h2 class="text-xl font-bold">TAX INVOICE</h2>
+                <p class="text-sm text-gray-600 mt-2">
+                    <strong>Invoice No:</strong> {{ order.order_number }}<br>
+                    <strong>Date:</strong> {{ order.order_date.strftime('%d-%m-%Y') }}<br>
+                    <strong>Status:</strong> 
+                    <span class="px-2 py-1 text-xs rounded {% if order.status == 'confirmed' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ order.status.upper() }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill To -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Bill To:</h3>
+        <div class="bg-gray-50 p-4 rounded">
+            <p class="font-semibold">{{ order.distributor.business_name }}</p>
+            <p class="text-sm text-gray-600">
+                {{ order.distributor.address_line1 }}<br>
+                {% if order.distributor.address_line2 %}{{ order.distributor.address_line2 }}<br>{% endif %}
+                {{ order.distributor.city }}, {{ order.distributor.state }} - {{ order.distributor.pincode }}<br>
+                <strong>GSTIN:</strong> {{ order.distributor.gstin or 'N/A' }}<br>
+                <strong>Contact:</strong> {{ order.distributor.contact_person }} - {{ order.distributor.phone }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="mb-6">
+        <table class="min-w-full border">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border px-4 py-2 text-left">#</th>
+                    <th class="border px-4 py-2 text-left">Product</th>
+                    <th class="border px-4 py-2 text-left">HSN</th>
+                    <th class="border px-4 py-2 text-right">Qty</th>
+                    <th class="border px-4 py-2 text-right">Rate</th>
+                    <th class="border px-4 py-2 text-right">Discount</th>
+                    <th class="border px-4 py-2 text-right">Taxable</th>
+                    <th class="border px-4 py-2 text-right">GST %</th>
+                    <th class="border px-4 py-2 text-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td class="border px-4 py-2">{{ loop.index }}</td>
+                    <td class="border px-4 py-2">
+                        <strong>{{ item.product.name }}</strong><br>
+                        <span class="text-xs text-gray-600">{{ item.product.sku }}</span>
+                    </td>
+                    <td class="border px-4 py-2">{{ item.hsn_code }}</td>
+                    <td class="border px-4 py-2 text-right">{{ item.quantity }}</td>
+                    <td class="border px-4 py-2 text-right">₹{{ "%.2f"|format(item.unit_price) }}</td>
+                    <td class="border px-4 py-2 text-right">{{ item.discount_percent }}%</td>
+                    <td class="border px-4 py-2 text-right">₹{{ "%.2f"|format(item.line_total) }}</td>
+                    <td class="border px-4 py-2 text-right">{{ item.gst_rate }}%</td>
+                    <td class="border px-4 py-2 text-right font-semibold">
+                        ₹{{ "%.2f"|format(item.line_total * (1 + item.gst_rate/100)) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="flex justify-end mb-6">
+        <div class="w-1/2">
+            <table class="w-full">
+                <tr class="border-b">
+                    <td class="py-2 text-right pr-4">Subtotal:</td>
+                    <td class="py-2 text-right font-semibold">₹{{ "%.2f"|format(order.subtotal) }}</td>
+                </tr>
+                {% if order.discount_amount > 0 %}
+                <tr class="border-b">
+                    <td class="py-2 text-right pr-4">Discount:</td>
+                    <td class="py-2 text-right font-semibold text-red-600">- ₹{{ "%.2f"|format(order.discount_amount) }}</td>
+                </tr>
+                {% endif %}
+                <tr class="border-b">
+                    <td class="py-2 text-right pr-4">Taxable Amount:</td>
+                    <td class="py-2 text-right font-semibold">₹{{ "%.2f"|format(order.taxable_amount) }}</td>
+                </tr>
+                {% if order.cgst_amount > 0 %}
+                <tr class="border-b">
+                    <td class="py-2 text-right pr-4">CGST:</td>
+                    <td class="py-2 text-right">₹{{ "%.2f"|format(order.cgst_amount) }}</td>
+                </tr>
+                <tr class="border-b">
+                    <td class="py-2 text-right pr-4">SGST:</td>
+                    <td class="py-2 text-right">₹{{ "%.2f"|format(order.sgst_amount) }}</td>
+                </tr>
+                {% endif %}
+                {% if order.igst_amount > 0 %}
+                <tr class="border-b">
+                    <td class="py-2 text-right pr-4">IGST:</td>
+                    <td class="py-2 text-right">₹{{ "%.2f"|format(order.igst_amount) }}</td>
+                </tr>
+                {% endif %}
+                <tr class="border-t-2 border-gray-400">
+                    <td class="py-2 text-right pr-4 text-lg font-bold">Total Amount:</td>
+                    <td class="py-2 text-right text-lg font-bold text-blue-600">₹{{ "%.2f"|format(order.total_amount) }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Payment Info -->
+    <div class="bg-blue-50 p-4 rounded mb-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm"><strong>Payment Terms:</strong> {{ order.payment_terms.upper() }}</p>
+                <p class="text-sm"><strong>Payment Status:</strong> 
+                    <span class="px-2 py-1 text-xs rounded {% if order.payment_status == 'paid' %}bg-green-100 text-green-800{% elif order.payment_status == 'partial' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ order.payment_status.upper() }}
+                    </span>
+                </p>
+                <p class="text-sm"><strong>Paid Amount:</strong> ₹{{ "%.2f"|format(order.paid_amount) }}</p>
+                <p class="text-sm"><strong>Outstanding:</strong> <span class="text-red-600 font-bold">₹{{ "%.2f"|format(order.total_amount - order.paid_amount) }}</span></p>
+            </div>
+            <div>
+                <p class="text-sm"><strong>Order Type:</strong> {{ order.order_type.upper() }}</p>
+                {% if order.delivery_date %}
+                <p class="text-sm"><strong>Delivery Date:</strong> {{ order.delivery_date.strftime('%d-%m-%Y') }}</p>
+                {% endif %}
+                {% if order.payment_status != 'paid' %}
+                <a href="{{ url_for('payment.add_payment', order_id=order.id) }}" class="inline-block mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm">
+                    Record Payment
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History -->
+    {% if order.payments %}
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Payment History</h3>
+        <div class="bg-white border rounded">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-semibold">Payment #</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold">Amount</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold">Mode</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold">Reference</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in order.payments %}
+                    <tr class="border-t">
+                        <td class="px-4 py-2 text-sm font-mono">{{ payment.payment_number }}</td>
+                        <td class="px-4 py-2 text-sm">{{ payment.payment_date.strftime('%d-%m-%Y') }}</td>
+                        <td class="px-4 py-2 text-sm font-semibold">₹{{ "%.2f"|format(payment.amount) }}</td>
+                        <td class="px-4 py-2 text-sm">{{ payment.payment_mode.upper() }}</td>
+                        <td class="px-4 py-2 text-sm">{{ payment.reference_number or '-' }}</td>
+                        <td class="px-4 py-2 text-sm">
+                            <span class="px-2 py-1 text-xs rounded {% if payment.status == 'cleared' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ payment.status.upper() }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Remarks -->
+    {% if order.remarks %}
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Remarks:</h3>
+        <p class="text-gray-600">{{ order.remarks }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="border-t-2 border-gray-300 pt-6 mt-6">
+        <div class="flex justify-between">
+            <div class="text-sm text-gray-600">
+                <p><strong>Terms & Conditions:</strong></p>
+                <ul class="list-disc list-inside text-xs mt-2">
+                    <li>Goods once sold will not be taken back</li>
+                    <li>Subject to Hajipur jurisdiction</li>
+                    <li>Payment terms as agreed</li>
+                </ul>
+            </div>
+            <div class="text-right">
+                <p class="text-sm font-semibold">For Mohi Industries</p>
+                <div class="mt-12 border-t border-gray-400 pt-2">
+                    <p class="text-xs">Authorized Signatory</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    nav, footer, button {
+        display: none !important;
+    }
+}
+
+/* Email Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #000000;
+    margin: 10% auto;
+    padding: 30px;
+    border: 2px solid #d00000;
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+}
+
+.modal-header {
+    color: #d00000;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #d00000;
+    padding-bottom: 10px;
+}
+
+.modal-body {
+    color: #ffffff;
+}
+
+.modal-body label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.modal-body input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #000000;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+.modal-body input:focus {
+    outline: none;
+    border-color: #d00000;
+}
+
+.modal-footer {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.modal-footer button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-send {
+    background: #d00000;
+    color: white;
+    border: 2px solid #d00000;
+}
+
+.btn-send:hover {
+    background: #a00000;
+}
+
+.btn-cancel {
+    background: #000000;
+    color: #ffffff;
+    border: 2px solid #333333;
+}
+
+.btn-cancel:hover {
+    border-color: #d00000;
+    color: #d00000;
+}
+</style>
+
+<!-- Email Modal -->
+<div id="emailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            📧 Send Invoice via Email
+        </div>
+        <form method="POST" action="{{ url_for('orders.send_email', id=order.id) }}">
+            <div class="modal-body">
+                <label for="to_email">To Email: *</label>
+                <input type="email" id="to_email" name="to_email" value="{{ order.distributor.email or '' }}" required placeholder="distributor@example.com">
+                
+                <label for="cc_email">CC Email (Optional):</label>
+                <input type="email" id="cc_email" name="cc_email" value="info@mohiindustries.in" placeholder="info@mohiindustries.in">
+                
+                <p style="font-size: 12px; color: #cccccc; margin-top: 10px;">
+                    ℹ️ Invoice will be sent as PDF attachment<br>
+                    📄 Invoice: {{ order.order_number }}<br>
+                    💰 Amount: ₹{{ "%.2f"|format(order.total_amount) }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeEmailModal()">Cancel</button>
+                <button type="submit" class="btn-send">Send Email</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showEmailModal() {
+    document.getElementById('emailModal').style.display = 'block';
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target == modal) {
+        closeEmailModal();
+    }
+}
+</script>
+{% endblock %}

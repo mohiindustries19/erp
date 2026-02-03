@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Send Bulk Message - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Bulk Message</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Send a custom message to selected distributors</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('whatsapp.dashboard') }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">← Back</a>
+        </div>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-3">Message</h2>
+            <textarea name="message" rows="6" required
+                class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-200"
+                placeholder="Type your WhatsApp message here..."></textarea>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Tip: Keep messages short and clear.</p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Select Distributors</h2>
+                <button type="button" id="bulkToggleAll" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">Select all</button>
+            </div>
+
+            <div class="space-y-4">
+                {% for city, dists in locations.items() %}
+                <div class="rounded-lg border border-gray-100 dark:border-dark-border overflow-hidden">
+                    <div class="px-4 py-3 bg-gray-50 dark:bg-dark-bg flex items-center justify-between">
+                        <div class="font-semibold text-gray-900 dark:text-gray-200">{{ city }}</div>
+                        <button type="button" class="text-sm text-primary-600 dark:text-primary-400 hover:underline city-toggle" data-city="{{ loop.index }}">Select</button>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {% for dist in dists %}
+                        <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg/50 cursor-pointer">
+                            <input type="checkbox" class="bulk-checkbox city-{{ loop.parent.index }}" name="distributor_ids" value="{{ dist.id }}">
+                            <span>
+                                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-200">{{ dist.business_name }}</span>
+                                <span class="block text-xs text-gray-500 dark:text-gray-400">{{ dist.phone }}{% if dist.contact_person %} · {{ dist.contact_person }}{% endif %}</span>
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex justify-end pt-5">
+                <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onclick="return confirm('Send this message to selected distributors?');">
+                    Send Message
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        const allBoxes = () => Array.from(document.querySelectorAll('.bulk-checkbox'));
+
+        const bulkToggleAll = document.getElementById('bulkToggleAll');
+        function allChecked() {
+            const boxes = allBoxes();
+            return boxes.length > 0 && boxes.every((b) => b.checked);
+        }
+        function updateAllText() {
+            bulkToggleAll.textContent = allChecked() ? 'Clear all' : 'Select all';
+        }
+
+        bulkToggleAll?.addEventListener('click', () => {
+            const target = !allChecked();
+            allBoxes().forEach((b) => (b.checked = target));
+            updateAllText();
+        });
+
+        document.querySelectorAll('.city-toggle').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const city = btn.getAttribute('data-city');
+                const boxes = Array.from(document.querySelectorAll('.city-' + city));
+                const target = !(boxes.length > 0 && boxes.every((b) => b.checked));
+                boxes.forEach((b) => (b.checked = target));
+                btn.textContent = target ? 'Clear' : 'Select';
+                updateAllText();
+            });
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('bulk-checkbox')) {
+                updateAllText();
+            }
+        });
+
+        updateAllText();
+    })();
+</script>
+{% endblock %}

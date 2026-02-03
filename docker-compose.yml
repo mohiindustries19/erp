@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mohi_db
+    environment:
+      POSTGRES_DB: mohi_erp
+      POSTGRES_USER: mohi_admin
+      POSTGRES_PASSWORD: mohi_secure_2024
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: mohi_web
+    command: python run.py
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://mohi_admin:mohi_secure_2024@db:5432/mohi_erp
+      - SECRET_KEY=mohi_secret_key_change_in_production
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

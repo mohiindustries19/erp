@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Expense Details - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Expense Details</h1>
+        <div class="space-x-2">
+            <a href="{{ url_for('accounting.list_expenses') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                ← Back
+            </a>
+            <a href="{{ url_for('accounting.edit_expense', id=expense.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition">
+                Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <p class="text-sm text-gray-600">Expense Number</p>
+                <p class="text-lg font-semibold">{{ expense.expense_number }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Date</p>
+                <p class="text-lg font-semibold">{{ expense.expense_date.strftime('%d-%m-%Y') }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Account</p>
+                <p class="text-lg font-semibold">{{ expense.account.name or expense.account.account_name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Category</p>
+                <p class="text-lg font-semibold">{{ expense.expense_category or 'General' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Vendor Name</p>
+                <p class="text-lg font-semibold">{{ expense.vendor_name or '-' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Vendor GSTIN</p>
+                <p class="text-lg font-semibold">{{ expense.vendor_gstin or '-' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Invoice Number</p>
+                <p class="text-lg font-semibold">{{ expense.invoice_number or '-' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Invoice Date</p>
+                <p class="text-lg font-semibold">{{ expense.invoice_date.strftime('%d-%m-%Y') if expense.invoice_date else '-' }}</p>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t pt-6">
+            <h3 class="text-lg font-bold mb-4">Amount Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Amount (Excl. GST):</span>
+                    <span class="font-semibold">₹{{ "%.2f"|format(expense.amount) }}</span>
+                </div>
+                {% if expense.is_gst_applicable %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">CGST:</span>
+                    <span class="font-semibold">₹{{ "%.2f"|format(expense.cgst_amount) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">SGST:</span>
+                    <span class="font-semibold">₹{{ "%.2f"|format(expense.sgst_amount) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">IGST:</span>
+                    <span class="font-semibold">₹{{ "%.2f"|format(expense.igst_amount) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total GST:</span>
+                    <span class="font-semibold">₹{{ "%.2f"|format(expense.total_gst) }}</span>
+                </div>
+                {% endif %}
+                <div class="flex justify-between text-lg border-t pt-2">
+                    <span class="font-bold">Total Amount:</span>
+                    <span class="font-bold text-green-600">₹{{ "%.2f"|format(expense.total_amount) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t pt-6">
+            <h3 class="text-lg font-bold mb-4">Payment Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Payment Mode</p>
+                    <p class="font-semibold">{{ expense.payment_mode.upper() }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Payment Status</p>
+                    <p class="font-semibold">
+                        {% if expense.payment_status == 'paid' %}
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded">Paid</span>
+                        {% else %}
+                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded">Pending</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Reference Number</p>
+                    <p class="font-semibold">{{ expense.reference_number or '-' }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if expense.description or expense.remarks %}
+        <div class="mt-6 border-t pt-6">
+            {% if expense.description %}
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-1">Description</p>
+                <p class="text-gray-800">{{ expense.description }}</p>
+            </div>
+            {% endif %}
+            {% if expense.remarks %}
+            <div>
+                <p class="text-sm text-gray-600 mb-1">Remarks</p>
+                <p class="text-gray-800">{{ expense.remarks }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

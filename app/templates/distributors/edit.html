@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Distributor - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800">Edit Distributor - {{ distributor.code }}</h2>
+    <p class="text-gray-600">Update distributor information</p>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <form method="POST" action="{{ url_for('distributor.edit_distributor', id=distributor.id) }}">
+        <!-- Business Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Business Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Business Name *
+                    </label>
+                    <input type="text" name="business_name" required value="{{ distributor.business_name }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Contact Person *
+                    </label>
+                    <input type="text" name="contact_person" required value="{{ distributor.contact_person }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Phone Number *
+                    </label>
+                    <input type="tel" name="phone" required value="{{ distributor.phone }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Email
+                    </label>
+                    <input type="email" name="email" value="{{ distributor.email or '' }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Compliance Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        GSTIN (15 digits)
+                    </label>
+                    <input type="text" name="gstin" maxlength="15" value="{{ distributor.gstin or '' }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        PAN (10 digits)
+                    </label>
+                    <input type="text" name="pan" maxlength="10" value="{{ distributor.pan or '' }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Address</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Address Line 1
+                    </label>
+                    <input type="text" name="address_line1" value="{{ distributor.address_line1 or '' }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Address Line 2
+                    </label>
+                    <input type="text" name="address_line2" value="{{ distributor.address_line2 or '' }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            City *
+                        </label>
+                        <input type="text" name="city" required value="{{ distributor.city }}"
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            State *
+                        </label>
+                        <input type="text" name="state" required value="{{ distributor.state }}"
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            State Code (GST)
+                        </label>
+                        <input type="text" name="state_code" maxlength="2" value="{{ distributor.state_code or '' }}"
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Pincode
+                        </label>
+                        <input type="text" name="pincode" maxlength="6" value="{{ distributor.pincode or '' }}"
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Territory
+                        </label>
+                        <input type="text" name="territory" value="{{ distributor.territory or '' }}"
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Terms -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Business Terms</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Margin % (12-18%)
+                    </label>
+                    <input type="number" name="margin_percentage" min="12" max="18" step="0.1" value="{{ distributor.margin_percentage }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Credit Limit (₹)
+                    </label>
+                    <input type="number" name="credit_limit" min="0" step="1000" value="{{ distributor.credit_limit }}"
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Payment Terms
+                    </label>
+                    <select name="payment_terms" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="advance" {% if distributor.payment_terms == 'advance' %}selected{% endif %}>Advance Payment</option>
+                        <option value="credit" {% if distributor.payment_terms == 'credit' %}selected{% endif %}>Credit</option>
+                        <option value="cod" {% if distributor.payment_terms == 'cod' %}selected{% endif %}>Cash on Delivery</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Status
+                    </label>
+                    <select name="status" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="active" {% if distributor.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if distributor.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="pending" {% if distributor.status == 'pending' %}selected{% endif %}>Pending</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('distributor.view_distributor', id=distributor.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
+                Cancel
+            </a>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+                Update Distributor
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

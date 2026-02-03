@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Validate GSTIN - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-gray-900">Validate GSTIN</h2>
+    <p class="text-gray-500 mt-1">Check GSTIN against government records</p>
+</div>
+
+<form method="POST" class="bg-white rounded-xl shadow-soft p-6 border border-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">GSTIN *</label>
+            <input type="text" name="gstin" required class="w-full rounded-lg border-gray-300 shadow-sm">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="px-6 py-2.5 bg-primary-600 text-white rounded-lg">Validate</button>
+        </div>
+    </div>
+</form>
+
+{% if result %}
+<div class="mt-6 bg-white rounded-xl shadow-soft p-6 border border-gray-100">
+    <pre class="text-sm text-gray-800">{{ result | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Warehouse - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Edit Warehouse - {{ warehouse.code }}</h2>
+    <p class="text-gray-600 dark:text-gray-400">Update warehouse information</p>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+    <form method="POST" action="{{ url_for('inventory.edit_warehouse', id=warehouse.id) }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Warehouse Code *
+                </label>
+                <input type="text" name="code" required value="{{ warehouse.code }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Warehouse Name *
+                </label>
+                <input type="text" name="name" required value="{{ warehouse.name }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    Location
+                </label>
+                <input type="text" name="location" value="{{ warehouse.location or '' }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    City *
+                </label>
+                <input type="text" name="city" required value="{{ warehouse.city }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                    State *
+                </label>
+                <input type="text" name="state" required value="{{ warehouse.state }}"
+                    class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="flex items-center">
+                <input type="checkbox" name="is_active" {% if warehouse.is_active %}checked{% endif %}
+                    class="mr-2 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                <span class="text-gray-700 dark:text-gray-300 text-sm font-bold">Warehouse is Active</span>
+            </label>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('inventory.list_warehouses') }}"
+                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-gray-600 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-blue-600 dark:hover:bg-blue-700">
+                Update Warehouse
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

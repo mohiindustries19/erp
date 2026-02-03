@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}View QC - {{ batch.batch_number }} - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-white">QC Details - {{ batch.batch_number }}</h1>
+        <a href="{{ url_for('qc.batches') }}" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg transition">
+            ← Back
+        </a>
+    </div>
+
+    <!-- Batch Info -->
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Batch Information</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-gray-400">Batch Number:</p>
+                <p class="text-white font-semibold">{{ batch.batch_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">Product:</p>
+                <p class="text-white font-semibold">{{ batch.product.name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">Quantity:</p>
+                <p class="text-white font-semibold">{{ batch.quantity }} {{ batch.product.unit }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">Expiry Date:</p>
+                <p class="text-white font-semibold">{{ batch.expiry_date.strftime('%d-%m-%Y') }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">QC Status:</p>
+                <p class="text-white font-semibold">{{ batch.qc_status|capitalize }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">QC Date:</p>
+                <p class="text-white font-semibold">{{ batch.qc_date.strftime('%d-%m-%Y') if batch.qc_date else 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- QC Checks History -->
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+        <h2 class="text-xl font-bold text-white mb-4">QC Checks History</h2>
+        {% if qc_checks %}
+        <div class="space-y-4">
+            {% for check in qc_checks %}
+            <div class="bg-gray-800 rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="text-white font-semibold">{{ check.template.name if check.template else 'Manual Check' }}</p>
+                        <p class="text-gray-400 text-sm">{{ check.checked_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                        {% if check.status == 'passed' %}bg-green-900 text-green-300
+                        {% elif check.status == 'failed' %}bg-red-900 text-red-300
+                        {% else %}bg-yellow-900 text-yellow-300{% endif %}">
+                        {{ check.status|upper }}
+                    </span>
+                </div>
+                {% if check.remarks %}
+                <p class="text-gray-300 text-sm mt-2">{{ check.remarks }}</p>
+                {% endif %}
+                <p class="text-gray-500 text-xs mt-2">Checked by: {{ check.checked_by_user.username if check.checked_by_user else 'Unknown' }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-8">No QC checks recorded yet</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

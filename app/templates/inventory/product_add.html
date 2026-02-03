@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Add Product - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Add New Product</h2>
+    <p class="text-gray-600 dark:text-gray-400">Register a new product in the system</p>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+    <form method="POST" action="{{ url_for('inventory.add_product') }}">
+        <!-- Basic Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Basic Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        SKU (Product Code) *
+                    </label>
+                    <input type="text" name="sku" required
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="BAK-001">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Product Name *
+                    </label>
+                    <input type="text" name="name" required
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="Mohi Bread 400g">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Category *
+                    </label>
+                    <select name="category_id" required
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                        <option value="">Select Category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Unit
+                    </label>
+                    <select name="unit"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                        <option value="pcs">Pieces</option>
+                        <option value="kg">Kilogram</option>
+                        <option value="ltr">Liter</option>
+                        <option value="box">Box</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Pack Size
+                    </label>
+                    <input type="text" name="pack_size"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="400g, 500ml, 1kg">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Description
+                    </label>
+                    <input type="text" name="description"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="Product description">
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Compliance & FSSAI</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        HSN Code
+                    </label>
+                    <input type="text" name="hsn_code" maxlength="8"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="19059010">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        GST Rate (%)
+                    </label>
+                    <input type="number" name="gst_rate" min="0" max="28" step="0.1" value="5"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Shelf Life (Days)
+                    </label>
+                    <input type="number" name="shelf_life_days" min="0" value="0"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="3-5 for bakery, 365 for pickles">
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="flex items-center">
+                    <input type="checkbox" name="requires_batch_tracking" checked
+                        class="mr-2 rounded text-primary-600 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    <span class="text-gray-700 dark:text-gray-300 text-sm font-bold">Requires Batch Tracking (FSSAI
+                        Compliance)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Pricing</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        MRP (₹) *
+                    </label>
+                    <input type="number" name="mrp" min="0" step="0.01" required
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="50.00">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Base Price (₹) *
+                    </label>
+                    <input type="number" name="base_price" min="0" step="0.01" required
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="40.00">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Cost Price (₹)
+                    </label>
+                    <input type="number" name="cost_price" min="0" step="0.01" value="0"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                        placeholder="30.00">
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Settings -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Inventory Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Minimum Stock Level
+                    </label>
+                    <input type="number" name="min_stock_level" min="0" value="0"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Reorder Level
+                    </label>
+                    <input type="number" name="reorder_level" min="0" value="0"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('inventory.list_products') }}"
+                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-gray-600 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-blue-600 dark:hover:bg-blue-700">
+                Add Product
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

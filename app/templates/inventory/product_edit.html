@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Product - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Edit Product - {{ product.sku }}</h2>
+    <p class="text-gray-600 dark:text-gray-400">Update product information</p>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+    <form method="POST" action="{{ url_for('inventory.edit_product', id=product.id) }}">
+        <!-- Basic Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Basic Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        SKU (Product Code) *
+                    </label>
+                    <input type="text" name="sku" required value="{{ product.sku }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Product Name *
+                    </label>
+                    <input type="text" name="name" required value="{{ product.name }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Category *
+                    </label>
+                    <select name="category_id" required
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if product.category_id==category.id %}selected{% endif %}>
+                            {{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Unit
+                    </label>
+                    <select name="unit"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                        <option value="pcs" {% if product.unit=='pcs' %}selected{% endif %}>Pieces</option>
+                        <option value="kg" {% if product.unit=='kg' %}selected{% endif %}>Kilogram</option>
+                        <option value="ltr" {% if product.unit=='ltr' %}selected{% endif %}>Liter</option>
+                        <option value="box" {% if product.unit=='box' %}selected{% endif %}>Box</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Pack Size
+                    </label>
+                    <input type="text" name="pack_size" value="{{ product.pack_size or '' }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Description
+                    </label>
+                    <input type="text" name="description" value="{{ product.description or '' }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Compliance & FSSAI</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        HSN Code
+                    </label>
+                    <input type="text" name="hsn_code" maxlength="8" value="{{ product.hsn_code or '' }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        GST Rate (%)
+                    </label>
+                    <input type="number" name="gst_rate" min="0" max="28" step="0.1" value="{{ product.gst_rate or 5 }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Shelf Life (Days)
+                    </label>
+                    <input type="number" name="shelf_life_days" min="0" value="{{ product.shelf_life_days or 0 }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Pricing</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        MRP (₹) *
+                    </label>
+                    <input type="number" name="mrp" min="0" step="0.01" required value="{{ product.mrp }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Base Price (₹) *
+                    </label>
+                    <input type="number" name="base_price" min="0" step="0.01" required value="{{ product.base_price }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Cost Price (₹)
+                    </label>
+                    <input type="number" name="cost_price" min="0" step="0.01" value="{{ product.cost_price or 0 }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Settings -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Inventory Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Minimum Stock Level
+                    </label>
+                    <input type="number" name="min_stock_level" min="0" value="{{ product.min_stock_level or 0 }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Reorder Level
+                    </label>
+                    <input type="number" name="reorder_level" min="0" value="{{ product.reorder_level or 0 }}"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-6">
+            <label class="flex items-center">
+                <input type="checkbox" name="is_active" {% if product.is_active %}checked{% endif %}
+                    class="mr-2 rounded text-primary-600 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                <span class="text-gray-700 dark:text-gray-300 text-sm font-bold">Product is Active</span>
+            </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('inventory.list_products') }}"
+                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-gray-600 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-blue-600 dark:hover:bg-blue-700">
+                Update Product
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

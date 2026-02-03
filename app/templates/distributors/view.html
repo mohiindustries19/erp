@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}{{ distributor.business_name }} - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <a href="{{ url_for('distributor.list_distributors') }}"
+                    class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Distributors</a>
+                <span>/</span>
+                <span>{{ distributor.code }}</span>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white">{{ distributor.business_name }}
+            </h2>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('distributor.print_distributor', id=distributor.id) }}" target="_blank"
+                class="inline-flex items-center px-4 py-2 bg-green-500 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-lg shadow-green-500/30 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                🖨️ Print Profile
+            </a>
+            <a href="{{ url_for('distributor.edit_distributor', id=distributor.id) }}"
+                class="inline-flex items-center px-4 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                    </path>
+                </svg>
+                Edit Details
+            </a>
+            <form action="{{ url_for('distributor.delete_distributor', id=distributor.id) }}" method="POST"
+                onsubmit="return confirm('Are you sure you want to delete this distributor?');">
+                <button type="submit"
+                    class="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/20 border border-transparent rounded-lg font-semibold text-xs text-red-700 dark:text-red-400 uppercase tracking-widest hover:bg-red-100 dark:hover:bg-red-900/40 active:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column: Details -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Business Info -->
+        <div
+            class="bg-white dark:bg-dark-surface rounded-xl shadow-soft border border-gray-100 dark:border-dark-border overflow-hidden">
+            <div
+                class="px-6 py-4 border-b border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-gray-800/40 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                        </path>
+                    </svg>
+                    Business Information
+                </h3>
+                <span
+                    class="px-2.5 py-0.5 rounded-full text-xs font-medium 
+                    {% if distributor.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                    {{ distributor.status|upper }}
+                </span>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Contact Person</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.contact_person }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Email Address</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.email or 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Phone Number</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.phone }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tax
+                        ID (GSTIN)</p>
+                    <p
+                        class="text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-gray-800 inline-block px-2 py-0.5 rounded">
+                        {{ distributor.gstin
+                        or 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">PAN
+                        Number</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.pan or 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Onboarding Date</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.onboarding_date.strftime('%d %B,
+                        %Y') if
+                        distributor.onboarding_date else 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Info -->
+        <div
+            class="bg-white dark:bg-dark-surface rounded-xl shadow-soft border border-gray-100 dark:border-dark-border overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-gray-800/40">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Location & Territory
+                </h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Billing Address</p>
+                    <p class="text-gray-900 dark:text-white">
+                        {{ distributor.address_line1 or '' }}<br>
+                        {% if distributor.address_line2 %}{{ distributor.address_line2 }}<br>{% endif %}
+                        {{ distributor.city }}, {{ distributor.state }}<br>
+                        {{ distributor.pincode or '' }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Territory / Zone</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.territory or 'General Territory'
+                        }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms Info -->
+        <div
+            class="bg-white dark:bg-dark-surface rounded-xl shadow-soft border border-gray-100 dark:border-dark-border overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-gray-800/40">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 3.666V19.12a.66.66 0 0 1-1.164.382l-1.036-1.554-1.036 1.555a.661.661 0 0 1-1.164-.383V10.665h4.4ZM11.166 1.5h1.667v1.667h-1.667zm3.333 1.667h1.667V1.5H14.5zm-6.666 0h1.666V1.5H7.834zM11.166 5.667h1.667V4h-1.667zm3.333 1.666h1.667V5.667H14.5zm-6.666 0h1.666V5.667H7.834z">
+                        </path>
+                    </svg>
+                    Commercial Terms
+                </h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Distributor Margin</p>
+                    <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ distributor.margin_percentage }}%
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Credit Limit</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white">₹{{
+                        "{:,.0f}".format(distributor.credit_limit) }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        Payment Terms</p>
+                    <p class="text-gray-900 dark:text-white font-medium">{{ distributor.payment_terms.replace('_', '
+                        ').title() }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Stats & Actions -->
+    <div class="space-y-6">
+        <!-- Quick Stats -->
+        <div class="bg-gradient-to-br from-primary-900 to-primary-800 rounded-xl shadow-lg p-6 text-white">
+            <h3 class="text-lg font-bold mb-6 text-primary-100">Performance Overview</h3>
+            <div class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-primary-300 text-sm">Total Orders</p>
+                        <p class="text-3xl font-display font-bold">{{ distributor.orders.count() }}</p>
+                    </div>
+                    <div class="bg-primary-700 p-3 rounded-lg text-primary-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="border-t border-primary-700 my-4"></div>
+
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-primary-300 text-sm">Outstanding Balance</p>
+                        <p class="text-3xl font-display font-bold">₹0.00</p>
+                    </div>
+                    <div class="bg-primary-700 p-3 rounded-lg text-primary-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div
+            class="bg-white dark:bg-dark-surface rounded-xl shadow-soft border border-gray-100 dark:border-dark-border p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Quick Actions</h3>
+            <div class="space-y-3">
+                <a href="{{ url_for('orders.add_order') }}?distributor_id={{ distributor.id }}"
+                    class="group flex items-center justify-between w-full bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 text-primary-700 dark:text-primary-300 px-4 py-3 rounded-xl transition-colors">
+                    <span class="font-semibold">Create New Order</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </a>
+
+                <a href="#"
+                    class="group flex items-center justify-between w-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-xl transition-colors">
+                    <span class="font-semibold">View Statement</span>
+                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                </a>
+
+                <a href="#"
+                    class="group flex items-center justify-between w-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-xl transition-colors">
+                    <span class="font-semibold">Record Payment</span>
+                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Pay Vendor Bill - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Pay Vendor Bill {{ bill.bill_number }}
+    </h2>
+    <p class="text-gray-500 dark:text-gray-400 mt-1">Outstanding: ₹{{ "%.2f"|format(outstanding) }}</p>
+</div>
+
+<form method="POST" action="{{ url_for('purchasing.pay_vendor_bill', id=bill.id) }}" class="space-y-6">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Date *</label>
+                <input type="date" name="payment_date" required value="{{ today }}"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount *</label>
+                <input type="number" name="amount" step="0.01" min="0" max="{{ outstanding }}" required
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Mode *</label>
+                <select name="payment_mode" required
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="cash">Cash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="upi">UPI</option>
+                    <option value="cheque">Cheque</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bank Name</label>
+                <input type="text" name="bank_name"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reference Number</label>
+                <input type="text" name="reference_number"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                <select name="status"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="cleared">Cleared</option>
+                    <option value="pending">Pending</option>
+                    <option value="bounced">Bounced</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-end space-x-4">
+        <a href="{{ url_for('purchasing.view_vendor_bill', id=bill.id) }}"
+            class="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Cancel</a>
+        <button type="submit"
+            class="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">Record
+            Payment</button>
+    </div>
+</form>
+{% endblock %}

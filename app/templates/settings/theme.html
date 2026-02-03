@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Theme Settings - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-text-primary mb-2">Theme Settings</h1>
+        <p class="text-text-tertiary">Customize the appearance of your ERP system</p>
+    </div>
+
+    <!-- Current Theme Info -->
+    <div class="bg-bg-card border-2 border-theme-primary rounded-lg p-6 mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-text-primary mb-2">Current Theme</h2>
+                <p class="text-lg text-theme-primary font-semibold">{{ theme_presets[current_theme]['name'] }}</p>
+                <p class="text-sm text-text-tertiary mt-1">{{ theme_presets[current_theme]['description'] }}</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="w-16 h-16 rounded-lg border-4 border-theme-primary" style="background-color: var(--theme-primary);"></div>
+                <div class="w-16 h-16 rounded-lg border-2 border-border-default" style="background-color: var(--theme-primary-hover);"></div>
+                <div class="w-16 h-16 rounded-lg border-2 border-border-default" style="background-color: var(--theme-primary-light);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Selection Form -->
+    <form method="POST" action="{{ url_for('settings.theme') }}" class="space-y-6" id="themeForm">
+        
+        <!-- Theme Presets Grid -->
+        <div>
+            <h3 class="text-lg font-bold text-text-primary mb-4">Choose a Theme</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for preset_key, preset_data in theme_presets.items() %}
+                <label class="cursor-pointer theme-card">
+                    <input type="radio" name="theme_preset" value="{{ preset_key }}" 
+                           {% if preset_key == current_theme %}checked{% endif %}
+                           class="hidden peer theme-radio">
+                    <div class="bg-bg-card border-2 border-border-default rounded-lg p-4 transition-all
+                                peer-checked:border-4 peer-checked:shadow-lg
+                                hover:border-gray-600 hover:shadow-md relative overflow-hidden"
+                         style="peer-checked:border-color: {{ preset_data['primary'] }};">
+                        
+                        <!-- Selected indicator -->
+                        <div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border-2 flex items-center justify-center
+                                    opacity-0 peer-checked:opacity-100 transition-opacity"
+                             style="border-color: {{ preset_data['primary'] }};">
+                            <svg class="w-4 h-4" style="color: {{ preset_data['primary'] }};" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 mb-3">
+                            <div class="w-12 h-12 rounded-lg border-2 shadow-md" 
+                                 style="background-color: {{ preset_data['primary'] }}; border-color: {{ preset_data['primary'] }};"></div>
+                            <div>
+                                <p class="font-bold text-text-primary text-sm">{{ preset_data['name'] }}</p>
+                                <p class="text-xs text-text-tertiary">{{ preset_key.capitalize() }}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-text-tertiary">{{ preset_data['description'] }}</p>
+                        
+                        <!-- Color swatches -->
+                        <div class="flex space-x-2 mt-3">
+                            <div class="w-6 h-6 rounded border border-border-default shadow-sm" 
+                                 style="background-color: {{ preset_data['primary'] }};"></div>
+                            <div class="w-6 h-6 rounded border border-border-default shadow-sm" 
+                                 style="background-color: {{ preset_data['primary_hover'] }};"></div>
+                            <div class="w-6 h-6 rounded border border-border-default shadow-sm" 
+                                 style="background-color: {{ preset_data['primary_light'] }};"></div>
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Apply To Options -->
+        <div class="bg-bg-card border border-border-default rounded-lg p-6">
+            <h3 class="text-lg font-bold text-text-primary mb-4">Apply Theme To</h3>
+            <div class="space-y-3">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="apply_to" value="user" checked
+                           class="w-4 h-4 text-theme-primary bg-bg-subtle border-border-default focus:ring-theme-primary">
+                    <div>
+                        <p class="text-text-primary font-semibold">My Account Only</p>
+                        <p class="text-sm text-text-tertiary">Theme will only apply to your account</p>
+                    </div>
+                </label>
+                
+                {% if is_admin %}
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="apply_to" value="company"
+                           class="w-4 h-4 text-theme-primary bg-bg-subtle border-border-default focus:ring-theme-primary">
+                    <div>
+                        <p class="text-text-primary font-semibold">Entire Company</p>
+                        <p class="text-sm text-text-tertiary">Theme will apply to all users (Admin only)</p>
+                    </div>
+                </label>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between">
+            <form method="POST" action="{{ url_for('settings.reset_theme') }}" class="inline">
+                <button type="submit"
+                        class="bg-bg-elevated hover:bg-bg-subtle text-text-primary px-6 py-3 rounded-lg transition"
+                        onclick="return confirm('Reset theme to company default?');">
+                    🔄 Reset to Default
+                </button>
+            </form>
+            
+            <div class="space-x-3">
+                <a href="{{ url_for('main.dashboard') }}" 
+                   class="bg-bg-elevated hover:bg-bg-subtle text-text-primary px-6 py-3 rounded-lg transition inline-block">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="bg-theme-primary hover:bg-theme-primary-hover text-white px-8 py-3 rounded-lg font-bold transition">
+                    💾 Save Theme
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Theme Preview Section -->
+    <div class="mt-12 bg-bg-card border border-border-default rounded-lg p-6">
+        <h3 class="text-lg font-bold text-text-primary mb-4">Preview Components</h3>
+        <div class="space-y-4">
+            <!-- Buttons -->
+            <div class="flex flex-wrap gap-3">
+                <button class="bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-lg transition">
+                    Primary Button
+                </button>
+                <button class="border-2 border-theme-primary text-theme-primary hover:bg-theme-primary hover:text-white px-4 py-2 rounded-lg transition">
+                    Outlined Button
+                </button>
+                <button class="bg-bg-elevated hover:bg-bg-subtle text-text-primary px-4 py-2 rounded-lg transition">
+                    Secondary Button
+                </button>
+            </div>
+            
+            <!-- Badges -->
+            <div class="flex flex-wrap gap-3">
+                <span class="bg-theme-primary text-white px-3 py-1 rounded-full text-sm font-semibold">Active</span>
+                <span class="border-2 border-theme-primary text-theme-primary px-3 py-1 rounded-full text-sm font-semibold">Pending</span>
+                <span class="bg-bg-elevated text-text-primary px-3 py-1 rounded-full text-sm font-semibold">Inactive</span>
+            </div>
+            
+            <!-- Links -->
+            <div class="space-y-2">
+                <p><a href="#" class="text-theme-primary hover:text-theme-primary-light underline">Sample Link</a></p>
+                <p><a href="#" class="text-theme-primary-light hover:text-theme-primary">Hover Link</a></p>
+            </div>
+            
+            <!-- Card with Border -->
+            <div class="border-2 border-theme-primary rounded-lg p-4 bg-bg-subtle">
+                <h4 class="text-theme-primary font-bold mb-2">Themed Card</h4>
+                <p class="text-text-secondary">This card uses the theme's primary color for borders and accents.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Theme card selection handling
+document.addEventListener('DOMContentLoaded', function() {
+    const themeCards = document.querySelectorAll('.theme-card');
+    const themeRadios = document.querySelectorAll('.theme-radio');
+    
+    // Theme colors mapping
+    const themeColors = {
+        'red': '#d00000',
+        'blue': '#0066cc',
+        'green': '#059669',
+        'purple': '#7c3aed',
+        'orange': '#ea580c',
+        'teal': '#0d9488',
+        'pink': '#db2777',
+        'indigo': '#4f46e5'
+    };
+    
+    // Function to update card styling
+    function updateCardSelection() {
+        themeCards.forEach((card, index) => {
+            const radio = themeRadios[index];
+            const cardDiv = card.querySelector('div');
+            const checkmark = card.querySelector('.absolute');
+            const themeName = radio.value;
+            const themeColor = themeColors[themeName];
+            
+            if (radio.checked) {
+                // Selected state
+                cardDiv.style.borderColor = themeColor;
+                cardDiv.style.borderWidth = '4px';
+                cardDiv.style.boxShadow = `0 10px 25px -5px ${themeColor}40, 0 8px 10px -6px ${themeColor}40`;
+                cardDiv.style.transform = 'scale(1.02)';
+                if (checkmark) {
+                    checkmark.style.borderColor = themeColor;
+                    checkmark.querySelector('svg').style.color = themeColor;
+                }
+            } else {
+                // Unselected state
+                cardDiv.style.borderColor = '#374151';
+                cardDiv.style.borderWidth = '2px';
+                cardDiv.style.boxShadow = 'none';
+                cardDiv.style.transform = 'scale(1)';
+            }
+        });
+    }
+    
+    // Initial update
+    updateCardSelection();
+    
+    // Listen for changes
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateCardSelection();
+            console.log('Theme selected:', this.value);
+        });
+    });
+    
+    // Add click handler to entire card
+    themeCards.forEach((card, index) => {
+        card.addEventListener('click', function() {
+            themeRadios[index].checked = true;
+            updateCardSelection();
+        });
+    });
+});
+
+// Debug form submission
+document.getElementById('themeForm').addEventListener('submit', function(e) {
+    console.log('Form submitting...');
+    const formData = new FormData(this);
+    console.log('Theme preset:', formData.get('theme_preset'));
+    console.log('Apply to:', formData.get('apply_to'));
+});
+</script>
+
+<style>
+/* Theme-aware utility classes */
+.bg-theme-primary {
+    background-color: var(--theme-primary) !important;
+}
+.bg-theme-primary-hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+.bg-theme-primary-light {
+    background-color: var(--theme-primary-light) !important;
+}
+.text-theme-primary {
+    color: var(--theme-primary) !important;
+}
+.text-theme-primary-hover {
+    color: var(--theme-primary-hover) !important;
+}
+.text-theme-primary-light {
+    color: var(--theme-primary-light) !important;
+}
+.border-theme-primary {
+    border-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary:hover {
+    background-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary-hover:hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+.hover\:text-theme-primary:hover {
+    color: var(--theme-primary) !important;
+}
+.hover\:text-theme-primary-light:hover {
+    color: var(--theme-primary-light) !important;
+}
+
+/* Theme card animations */
+.theme-card > div {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-card:hover > div {
+    border-color: #6b7280 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.theme-card .absolute {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Pulse animation for selected card */
+@keyframes pulse-border {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.theme-radio:checked + div {
+    animation: pulse-border 2s ease-in-out infinite;
+}
+</style>
+{% endblock %}

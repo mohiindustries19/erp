@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Bill {{ bill.bill_number }} - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Vendor Bill {{ bill.bill_number }}
+        </h2>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Vendor: {{ bill.vendor.business_name }}</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="{{ url_for('purchasing.print_vendor_bill', id=bill.id) }}" target="_blank"
+            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">Print</a>
+        <a href="{{ url_for('purchasing.edit_vendor_bill', id=bill.id) }}"
+            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">Edit</a>
+        {% if bill.approval_status == 'approved' and bill.total_amount - bill.paid_amount > 0 %}
+        <a href="{{ url_for('purchasing.pay_vendor_bill', id=bill.id) }}"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Pay Bill</a>
+        {% endif %}
+    </div>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Bill Date</p>
+            <p class="font-medium text-gray-900 dark:text-white">{{ bill.bill_date.strftime('%Y-%m-%d') }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Due Date</p>
+            <p class="font-medium text-gray-900 dark:text-white">{{ bill.due_date.strftime('%Y-%m-%d') if bill.due_date
+                else '-' }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+            <p class="font-medium text-gray-900 dark:text-white">{{ bill.status|capitalize }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Approval</p>
+            <p class="font-medium text-gray-900 dark:text-white">{{ bill.approval_status|capitalize }}</p>
+        </div>
+    </div>
+</div>
+
+<div
+    class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none border border-gray-100 dark:border-dark-border overflow-hidden mb-6">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+        <thead class="bg-gray-50 dark:bg-dark-bg">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Product
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Qty
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Unit
+                    Cost</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">GST %
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Line
+                    Total</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
+            {% for item in bill.items %}
+            <tr class="dark:bg-dark-surface">
+                <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{{ item.product.name }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ item.quantity }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">₹{{ "%.2f"|format(item.unit_cost) }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ item.gst_rate }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">₹{{ "%.2f"|format(item.line_total) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl shadow-soft p-6 border border-gray-200 dark:border-gray-600">
+    <div class="space-y-2 text-gray-700 dark:text-gray-300">
+        <div class="flex justify-between">
+            <span>Subtotal</span>
+            <span class="font-mono text-gray-900 dark:text-gray-200">₹{{ "%.2f"|format(bill.subtotal) }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span>GST</span>
+            <span class="font-mono text-gray-900 dark:text-gray-200">₹{{ "%.2f"|format(bill.tax_amount) }}</span>
+        </div>
+        <div
+            class="border-t border-gray-200 dark:border-gray-600 pt-2 flex justify-between font-bold text-gray-900 dark:text-white">
+            <span>Total</span>
+            <span class="font-mono">₹{{ "%.2f"|format(bill.total_amount) }}</span>
+        </div>
+    </div>
+</div>
+
+{% if bill.payments.count() > 0 %}
+<div
+    class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none border border-gray-100 dark:border-dark-border overflow-hidden mt-6">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-dark-border">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white">Payments</h3>
+    </div>
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+        <thead class="bg-gray-50 dark:bg-dark-bg">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Date
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Mode
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                    Reference</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Amount
+                </th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
+            {% for payment in bill.payments %}
+            <tr class="dark:bg-dark-surface">
+                <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{{
+                    payment.payment_date.strftime('%Y-%m-%d') }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ payment.payment_mode|replace('_', '
+                    ')|capitalize }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ payment.reference_number or '-' }}
+                </td>
+                <td class="px-4 py-3 text-sm text-right font-mono text-gray-900 dark:text-gray-200">₹{{
+                    "%.2f"|format(payment.amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

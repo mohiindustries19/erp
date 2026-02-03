@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt Details - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Receipt Details</h1>
+        <div class="space-x-2">
+            <a href="{{ url_for('accounting.list_receipts') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                ← Back
+            </a>
+            <a href="{{ url_for('payment.print_receipt', id=receipt.id) }}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition" target="_blank">
+                Print
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <p class="text-sm text-gray-600">Receipt Number</p>
+                <p class="text-lg font-semibold">{{ receipt.payment_number }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Date</p>
+                <p class="text-lg font-semibold">{{ receipt.payment_date.strftime('%d-%m-%Y') }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Customer</p>
+                <p class="text-lg font-semibold">{{ receipt.order.distributor.business_name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Order Number</p>
+                <p class="text-lg font-semibold">
+                    <a href="{{ url_for('orders.view_order', id=receipt.order_id) }}" class="text-blue-600 hover:underline">
+                        {{ receipt.order.order_number }}
+                    </a>
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Payment Mode</p>
+                <p class="text-lg font-semibold">{{ receipt.payment_mode.upper() }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Status</p>
+                <p class="text-lg font-semibold">
+                    {% if receipt.status == 'cleared' %}
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded">Cleared</span>
+                    {% elif receipt.status == 'pending' %}
+                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded">Pending</span>
+                    {% else %}
+                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded">{{ receipt.status }}</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Reference Number</p>
+                <p class="text-lg font-semibold">{{ receipt.reference_number or '-' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Bank Name</p>
+                <p class="text-lg font-semibold">{{ receipt.bank_name or '-' }}</p>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t pt-6">
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold text-gray-800">Amount Received:</span>
+                <span class="text-3xl font-bold text-green-600">₹{{ "%.2f"|format(receipt.amount) }}</span>
+            </div>
+        </div>
+
+        {% if receipt.remarks %}
+        <div class="mt-6 border-t pt-6">
+            <p class="text-sm text-gray-600 mb-1">Remarks</p>
+            <p class="text-gray-800">{{ receipt.remarks }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Accounting Entries -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Accounting Entries</h2>
+        <table class="min-w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Account</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
+                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Debit</th>
+                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Credit</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for entry in entries %}
+                <tr>
+                    <td class="px-4 py-2 text-sm font-semibold">{{ entry.account_head }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-600">{{ entry.description }}</td>
+                    <td class="px-4 py-2 text-sm text-right">
+                        {% if entry.debit > 0 %}
+                        <span class="text-green-600 font-semibold">₹{{ "%.2f"|format(entry.debit) }}</span>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td class="px-4 py-2 text-sm text-right">
+                        {% if entry.credit > 0 %}
+                        <span class="text-red-600 font-semibold">₹{{ "%.2f"|format(entry.credit) }}</span>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="bg-gray-100 font-bold">
+                    <td colspan="2" class="px-4 py-2">TOTAL</td>
+                    <td class="px-4 py-2 text-right text-green-600">₹{{ "%.2f"|format(sum(e.debit for e in entries)) }}</td>
+                    <td class="px-4 py-2 text-right text-red-600">₹{{ "%.2f"|format(sum(e.credit for e in entries)) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

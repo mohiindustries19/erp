@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Advanced Analytics - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Advanced Analytics</h1>
+        <p class="text-gray-600 mt-2">ML-powered insights for smarter business decisions</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm">Sales Forecast</p>
+                    <p class="text-2xl font-bold mt-1">Predictive</p>
+                </div>
+                <div class="text-2xl opacity-80 font-semibold">SF</div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm">Churn Risk</p>
+                    <p class="text-2xl font-bold mt-1">Detection</p>
+                </div>
+                <div class="text-2xl opacity-80 font-semibold">Risk</div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm">Inventory</p>
+                    <p class="text-2xl font-bold mt-1">Optimization</p>
+                </div>
+                <div class="text-2xl opacity-80 font-semibold">Inv</div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm">Profit</p>
+                    <p class="text-2xl font-bold mt-1">Analysis</p>
+                </div>
+                <div class="text-2xl opacity-80 font-semibold">P/L</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modules -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Sales Forecast -->
+        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-4 font-semibold text-blue-600">SF</div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Sales Forecasting</h2>
+                    <p class="text-gray-600 text-sm">Predict future sales trends</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">
+                Use machine learning to forecast sales for the next 3-6 months based on historical data patterns.
+            </p>
+            <ul class="text-sm text-gray-600 mb-4 space-y-1">
+                <li>Linear regression model</li>
+                <li>Trend analysis</li>
+                <li>Confidence intervals</li>
+                <li>Monthly projections</li>
+            </ul>
+            <a href="{{ url_for('advanced_analytics.sales_forecast_page') }}" 
+               class="block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded transition">
+                View Forecast
+            </a>
+        </div>
+
+        <!-- Churn Prediction -->
+        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-4 font-semibold text-red-600">Risk</div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Churn Prediction</h2>
+                    <p class="text-gray-600 text-sm">Identify at-risk customers</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">
+                Detect customers likely to stop ordering and take proactive retention actions.
+            </p>
+            <ul class="text-sm text-gray-600 mb-4 space-y-1">
+                <li>Risk scoring (0-100)</li>
+                <li>Behavioral analysis</li>
+                <li>Priority ranking</li>
+                <li>Retention insights</li>
+            </ul>
+            <a href="{{ url_for('advanced_analytics.churn_prediction_page') }}" 
+               class="block w-full bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded transition">
+                View Predictions
+            </a>
+        </div>
+
+        <!-- Inventory Optimization -->
+        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-4 font-semibold text-green-600">Inv</div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Inventory Optimization</h2>
+                    <p class="text-gray-600 text-sm">Smart stock management</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">
+                Get AI-powered recommendations for optimal inventory levels and reorder quantities.
+            </p>
+            <ul class="text-sm text-gray-600 mb-4 space-y-1">
+                <li>Stock level analysis</li>
+                <li>Reorder recommendations</li>
+                <li>Overstock detection</li>
+                <li>Priority alerts</li>
+            </ul>
+            <a href="{{ url_for('advanced_analytics.inventory_optimization_page') }}" 
+               class="block w-full bg-green-500 hover:bg-green-600 text-white text-center py-2 rounded transition">
+                View Recommendations
+            </a>
+        </div>
+
+        <!-- Profit Analysis -->
+        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-4 font-semibold text-purple-600">P/L</div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Profit Analysis</h2>
+                    <p class="text-gray-600 text-sm">Comprehensive profitability insights</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">
+                Analyze profit margins by customer, product, and time period for better decision making.
+            </p>
+            <ul class="text-sm text-gray-600 mb-4 space-y-1">
+                <li>Customer profitability</li>
+                <li>Monthly trends</li>
+                <li>Margin analysis</li>
+                <li>Top performers</li>
+            </ul>
+            <a href="{{ url_for('advanced_analytics.profit_analysis_page') }}" 
+               class="block w-full bg-purple-500 hover:bg-purple-600 text-white text-center py-2 rounded transition">
+                View Analysis
+            </a>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="mt-8 bg-blue-50 border-l-4 border-blue-500 p-6 rounded">
+        <div class="flex items-start">
+            <div class="text-2xl mr-3 font-semibold text-blue-700">Info</div>
+            <div>
+                <h3 class="font-bold text-blue-900 mb-2">About Advanced Analytics</h3>
+                <p class="text-blue-800 text-sm">
+                    These ML-powered tools analyze your historical data to provide actionable insights. 
+                    The more data you have, the more accurate the predictions become. 
+                    Recommendations are updated in real-time based on your latest transactions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Label - {{ product.name }} - Mohi Industries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: 50mm 75mm;  /* Standard retail label size */
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .label-container {
+            width: 50mm;
+            height: 75mm;
+            background: white;
+            page-break-after: always;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+
+        .label-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        @media screen {
+            .label-container {
+                transform: scale(2);
+                margin: 100px auto;
+            }
+        }
+
+        /* Fallback styling if image not available */
+        .fallback-label {
+            width: 50mm;
+            height: 75mm;
+            padding: 3mm;
+            border: 1px solid #ccc;
+            font-size: 8pt;
+            background: white;
+        }
+        
+        @media screen {
+            .fallback-label {
+                transform: scale(2);
+                margin: 100px auto;
+            }
+        }
+
+        .fallback-label .company {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 2mm;
+            border-bottom: 1px solid #d00000;
+            padding-bottom: 1mm;
+        }
+
+        .fallback-label .product-name {
+            text-align: center;
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 2mm;
+        }
+
+        .fallback-label .mrp {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #d00000;
+            margin: 3mm 0;
+            padding: 2mm;
+            border: 2px solid #d00000;
+        }
+
+        .fallback-label .info {
+            font-size: 7pt;
+            text-align: center;
+            margin-top: 2mm;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+
+        .notice {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            max-width: 520px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-left: 6px solid #d00000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            padding: 12px 14px;
+            border-radius: 8px;
+        }
+
+        .notice h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .notice p {
+            font-size: 12px;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        .notice .actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: #d00000;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #444;
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #d00000;
+            border: 1px solid #d00000;
+        }
+    </style>
+</head>
+<body>
+    {% if barcode_missing or label_error %}
+    <div class="notice no-print">
+        {% if barcode_missing %}
+            <h4>Barcode missing</h4>
+            <p>
+                This product has no EAN-13 barcode assigned. The label will show “No barcode assigned” until you generate or enter a barcode.
+            </p>
+        {% endif %}
+        {% if label_error %}
+            <h4 style="margin-top: 10px;">Label generation issue</h4>
+            <p>{{ label_error }}</p>
+        {% endif %}
+        <div class="actions">
+            <a class="btn btn-outline" href="{{ url_for('barcode.view_product_barcode', product_id=product.id) }}" target="_blank" rel="noopener">
+                Manage / Assign Barcode
+            </a>
+            {% if barcode_missing and barcode_lib_available %}
+            <form method="POST" action="{{ url_for('barcode.generate_product_barcode', product_id=product.id) }}" style="display: inline;">
+                <input type="hidden" name="company_prefix" value="{{ default_company_prefix }}">
+                <input type="hidden" name="barcode_source" value="internal">
+                <input type="hidden" name="next" value="{{ return_url }}">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Generate an INTERNAL barcode for this product? (Use GS1 source only if you have registered codes)');">
+                    Generate Barcode
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if label_image %}
+    <!-- Professional generated label -->
+    <div class="label-container">
+        <img src="data:image/png;base64,{{ label_image }}" alt="Product Label" class="label-image">
+    </div>
+    {% else %}
+    <!-- Fallback label if barcode not available -->
+    <div class="label-container">
+        <div class="fallback-label">
+            <div class="company">MOHI INDUSTRIES</div>
+            <div class="product-name">{{ product.name }}</div>
+            
+            {% if product.pack_size %}
+            <div style="text-align: center; margin: 2mm 0;">Net Wt: {{ product.pack_size }}</div>
+            {% endif %}
+            
+            <div class="mrp">MRP: ₹{{ "%.2f"|format(product.mrp) }}</div>
+            <div style="text-align: center; font-size: 6pt; color: gray;">(Incl. of all taxes)</div>
+            
+            {% if batch %}
+            <div class="info">
+                <div>Batch: {{ batch.batch_number }}</div>
+                <div>Mfg: {{ batch.manufacturing_date.strftime('%d/%m/%Y') }}</div>
+                <div>Exp: {{ batch.expiry_date.strftime('%d/%m/%Y') }}</div>
+            </div>
+            {% endif %}
+            
+            <div style="text-align: center; font-size: 6pt; margin-top: 3mm; color: #666;">
+                <div>FSSAI Lic: 12345678901234</div>
+                <div>Mohi Nagar, Hajipur</div>
+                <div>Vaishali, Bihar - 844101</div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2mm; padding: 1mm; background: #ffe6e6; font-size: 7pt;">
+                ⚠️ Barcode not available
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Print button (hidden when printing) -->
+    <div class="no-print" style="position: fixed; top: 10px; right: 10px;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #d00000; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
+            🖨️ Print Label
+        </button>
+        <a href="{{ url_for('barcode.view_product_barcode', product_id=product.id) }}" target="_blank" rel="noopener"
+           style="display: inline-block; padding: 10px 20px; background: #ffffff; color: #d00000; border: 1px solid #d00000; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px; text-decoration: none;">
+            🧾 Barcode
+        </a>
+        <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;">
+            ✕ Close
+        </button>
+    </div>
+</body>
+</html>

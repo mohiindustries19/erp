@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
+        <div class="space-x-2">
+            <a href="{{ url_for('analytics.export_data', export_type='customers') }}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition">
+                Export Customers
+            </a>
+            <a href="{{ url_for('analytics.export_data', export_type='sales') }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition">
+                Export Sales
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Total Receivable</p>
+            <p class="text-3xl font-bold text-blue-600">₹{{ "%.2f"|format(total_receivable) }}</p>
+            <p class="text-xs text-gray-500 mt-1">Outstanding payments</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Total Collected</p>
+            <p class="text-3xl font-bold text-green-600">₹{{ "%.2f"|format(total_collected) }}</p>
+            <p class="text-xs text-gray-500 mt-1">Cleared payments</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Avg Satisfaction</p>
+            <p class="text-3xl font-bold text-purple-600">{{ "%.1f"|format(avg_satisfaction) }}/10</p>
+            <p class="text-xs text-gray-500 mt-1">Customer rating</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Loyalty Points</p>
+            <p class="text-3xl font-bold text-yellow-600">{{ total_loyalty_points }}</p>
+            <p class="text-xs text-gray-500 mt-1">Total across customers</p>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Monthly Sales Trend -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Monthly Sales Trend</h2>
+            <div style="height: 300px;">
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- State-wise Sales -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Top States by Sales</h2>
+            <div style="height: 300px;">
+                <canvas id="stateSalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Top Products -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 Products</h2>
+            <div style="height: 300px;">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Payment Collection -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Payment Collection</h2>
+            <div style="height: 300px;">
+                <canvas id="paymentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers Table -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 Customers by Revenue</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Rank</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Business Name</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Total Revenue</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Orders</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Avg Order Value</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for customer in top_customers %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm font-bold text-gray-600">{{ loop.index }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-800">{{ customer.business_name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ customer.city }}, {{ customer.state }}</td>
+                        <td class="px-4 py-3 text-sm text-right font-bold text-green-600">₹{{ "%.2f"|format(customer.total_revenue) }}</td>
+                        <td class="px-4 py-3 text-sm text-right">{{ customer.order_count }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-600">₹{{ "%.2f"|format(customer.total_revenue / customer.order_count) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- State-wise Sales Table -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">State-wise Sales Distribution</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">State</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Total Sales</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Orders</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Avg Order Value</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for state in state_sales %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-800">{{ state.state }}</td>
+                        <td class="px-4 py-3 text-sm text-right font-bold text-green-600">₹{{ "%.2f"|format(state.total_sales) }}</td>
+                        <td class="px-4 py-3 text-sm text-right">{{ state.order_count }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-600">₹{{ "%.2f"|format(state.total_sales / state.order_count) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Prevent multiple chart initializations
+let chartsInitialized = false;
+
+function initializeCharts() {
+    if (chartsInitialized) return;
+    chartsInitialized = true;
+
+    // Monthly Sales Trend Chart
+    fetch('/analytics/api/chart-data/monthly_sales')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Sales (₹)',
+                        data: data.values,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // State Sales Chart
+    fetch('/analytics/api/chart-data/state_sales')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('stateSalesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Sales (₹)',
+                        data: data.values,
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderColor: 'rgb(34, 197, 94)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // Top Products Chart
+    fetch('/analytics/api/chart-data/top_products')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('topProductsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Sales (₹)',
+                        data: data.values,
+                        backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                        borderColor: 'rgb(168, 85, 247)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    // Payment Collection Chart
+    const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+    new Chart(paymentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Collected', 'Outstanding'],
+            datasets: [{
+                data: [{{ total_collected }}, {{ total_receivable }}],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(34, 197, 94)',
+                    'rgb(239, 68, 68)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ₹' + context.parsed.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Initialize charts when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCharts);
+} else {
+    initializeCharts();
+}
+</script>
+{% endblock %}

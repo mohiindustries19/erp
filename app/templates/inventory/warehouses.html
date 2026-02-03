@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Warehouses - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Warehouses</h2>
+        <p class="text-gray-600 dark:text-gray-400">Manage warehouse locations</p>
+    </div>
+    <a href="{{ url_for('inventory.add_warehouse') }}"
+        class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded shadow-lg shadow-green-500/30 transition-all dark:bg-green-600 dark:hover:bg-green-700">
+        + Add Warehouse
+    </a>
+</div>
+
+{% if warehouses %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for warehouse in warehouses %}
+    <div
+        class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6 hover:shadow-lg dark:hover:bg-gray-800/80 transition-all duration-300">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">{{ warehouse.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 font-mono">{{ warehouse.code }}</p>
+            </div>
+            <span
+                class="px-2 py-1 text-xs rounded font-medium {% if warehouse.is_active %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                {{ 'ACTIVE' if warehouse.is_active else 'INACTIVE' }}
+            </span>
+        </div>
+
+        <div class="mb-4 text-sm text-gray-700 dark:text-gray-300">
+            {% if warehouse.location %}
+            <p>{{ warehouse.location }}</p>
+            {% endif %}
+            <p>{{ warehouse.city }}{% if warehouse.state %}, {{ warehouse.state }}{% endif %}</p>
+        </div>
+
+        <div class="mb-4 text-sm space-y-1">
+            <p class="text-gray-600 dark:text-gray-400">Inventory Items: <strong
+                    class="text-gray-900 dark:text-white">{{ warehouse.inventory.count() }}</strong></p>
+            <p class="text-gray-600 dark:text-gray-400">Batches: <strong class="text-gray-900 dark:text-white">{{
+                    warehouse.batches.count() }}</strong></p>
+        </div>
+
+        <div class="flex space-x-2">
+            <a href="{{ url_for('inventory.edit_warehouse', id=warehouse.id) }}"
+                class="flex-1 text-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow-sm transition-all dark:bg-blue-600 dark:hover:bg-blue-700">
+                Edit
+            </a>
+            <form method="POST" action="{{ url_for('inventory.delete_warehouse', id=warehouse.id) }}" class="flex-1"
+                onsubmit="return confirm('Delete warehouse {{ warehouse.code }}?');">
+                <button type="submit"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow-sm transition-all dark:bg-red-600 dark:hover:bg-red-700">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 dark:bg-yellow-900/20 dark:border-yellow-600">
+    <p class="text-yellow-700 dark:text-yellow-400">No warehouses found. Add warehouses to manage inventory locations.
+    </p>
+</div>
+{% endif %}
+{% endblock %}

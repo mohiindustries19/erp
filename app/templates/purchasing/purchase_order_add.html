@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}New Purchase Order - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Create Purchase Order</h2>
+    <p class="text-gray-500 dark:text-gray-400 mt-1">Raise a PO for a vendor</p>
+</div>
+
+<div x-data="purchaseOrderForm()">
+    <form method="POST" action="{{ url_for('purchasing.add_purchase_order') }}" @submit="prepareSubmit"
+        class="space-y-6">
+        <input type="hidden" name="items_json" x-model="itemsJSON">
+
+        <div
+            class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Vendor & PO Details</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Vendor *</label>
+                    <select name="vendor_id" required
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <option value="">-- Select Vendor --</option>
+                        {% for vendor in vendors %}
+                        <option value="{{ vendor.id }}">{{ vendor.code }} - {{ vendor.business_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Order Date *</label>
+                    <input type="date" name="order_date" required value="{{ today }}"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expected Date</label>
+                    <input type="date" name="expected_date"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                    <select name="status"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <option value="draft">Draft</option>
+                        <option value="ordered">Ordered</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
+                    <textarea name="remarks" rows="2"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none p-6 border border-gray-100 dark:border-dark-border">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Items</h3>
+                <button type="button" @click="addItem()"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Add
+                    Item</button>
+            </div>
+            <div class="overflow-x-auto border border-gray-100 dark:border-gray-600 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                    <thead class="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                Product</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                Qty</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                Unit Cost</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                GST %</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                Line Total</th>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-dark-surface">
+                        <template x-for="(item, index) in items" :key="index">
+                            <tr>
+                                <td class="px-4 py-2">
+                                    <select x-model="item.product_id" @change="updateProduct(index, $event)"
+                                        class="w-full rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:border-primary-500 focus:ring-primary-500 text-gray-900 dark:text-white">
+                                        <option value="">-- Select Product --</option>
+                                        {% for product in products %}
+                                        <option value="{{ product.id }}"
+                                            data-cost="{{ product.cost_price or product.base_price }}"
+                                            data-gst="{{ product.gst_rate }}">
+                                            {{ product.sku }} - {{ product.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" x-model.number="item.quantity" min="1"
+                                        @input="calculateLineTotal(index)"
+                                        class="w-full rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:border-primary-500 focus:ring-primary-500 text-gray-900 dark:text-white">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" x-model.number="item.unit_cost" step="0.01" min="0"
+                                        @input="calculateLineTotal(index)"
+                                        class="w-full rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:border-primary-500 focus:ring-primary-500 text-gray-900 dark:text-white">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" x-model.number="item.gst_rate" step="0.01" min="0"
+                                        class="w-full rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-400 text-sm cursor-not-allowed"
+                                        readonly>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <span class="font-mono text-gray-900 dark:text-gray-200"
+                                        x-text="'₹' + item.line_total.toFixed(2)"></span>
+                                </td>
+                                <td class="px-4 py-2 text-center">
+                                    <button type="button" @click="removeItem(index)"
+                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">Remove</button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="items.length === 0">
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">No items
+                                added.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div
+            class="bg-gray-50 dark:bg-gray-700/50 rounded-xl shadow-soft p-6 border border-gray-200 dark:border-gray-600">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Summary</h3>
+            <div class="space-y-2 text-gray-700 dark:text-gray-300">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span class="font-mono" x-text="'₹' + subtotal.toFixed(2)"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span>GST</span>
+                    <span class="font-mono" x-text="'₹' + taxAmount.toFixed(2)"></span>
+                </div>
+                <div
+                    class="border-t border-gray-200 dark:border-gray-600 pt-2 flex justify-between font-bold text-gray-900 dark:text-white">
+                    <span>Total</span>
+                    <span class="font-mono" x-text="'₹' + totalAmount.toFixed(2)"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{{ url_for('purchasing.list_purchase_orders') }}"
+                class="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Cancel</a>
+            <button type="submit"
+                class="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                :disabled="items.length === 0">Create PO</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function purchaseOrderForm() {
+        return {
+            items: [],
+            subtotal: 0,
+            taxAmount: 0,
+            totalAmount: 0,
+            itemsJSON: '',
+            addItem() {
+                this.items.push({ product_id: '', quantity: 1, unit_cost: 0, gst_rate: 0, line_total: 0 });
+            },
+            removeItem(index) {
+                this.items.splice(index, 1);
+                this.calculateTotals();
+            },
+            updateProduct(index, event) {
+                const option = event.target.selectedOptions[0];
+                const cost = parseFloat(option.getAttribute('data-cost') || '0');
+                const gst = parseFloat(option.getAttribute('data-gst') || '0');
+                this.items[index].unit_cost = cost;
+                this.items[index].gst_rate = gst;
+                this.calculateLineTotal(index);
+            },
+            calculateLineTotal(index) {
+                const item = this.items[index];
+                item.line_total = (item.quantity || 0) * (item.unit_cost || 0);
+                this.calculateTotals();
+            },
+            calculateTotals() {
+                this.subtotal = this.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
+                this.taxAmount = this.items.reduce((sum, item) => sum + ((item.line_total || 0) * (item.gst_rate || 0) / 100), 0);
+                this.totalAmount = this.subtotal + this.taxAmount;
+            },
+            prepareSubmit() {
+                this.itemsJSON = JSON.stringify(this.items.filter(i => i.product_id && i.quantity > 0));
+            }
+        }
+    }
+</script>
+{% endblock %}

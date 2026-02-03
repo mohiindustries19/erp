@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Opening Balances - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Opening Balances</h1>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('accounting.export_opening_balances_excel') }}" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                📊 Export Excel
+            </a>
+            <a href="{{ url_for('accounting.print_opening_balances') }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                🖨️ Print
+            </a>
+            <a href="{{ url_for('accounting.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                ← Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Balance Check -->
+    <div class="mb-6 p-4 rounded-lg {% if is_balanced %}bg-green-100 border-green-500{% else %}bg-red-100 border-red-500{% endif %} border-l-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="font-semibold {% if is_balanced %}text-green-800{% else %}text-red-800{% endif %}">
+                    {% if is_balanced %}
+                    Books are Balanced
+                    {% else %}
+                    Books are NOT Balanced
+                    {% endif %}
+                </p>
+                <p class="text-sm {% if is_balanced %}text-green-700{% else %}text-red-700{% endif %}">
+                    Assets: ₹{{ "%.2f"|format(total_assets) }} | 
+                    Liabilities + Equity: ₹{{ "%.2f"|format(total_liabilities + total_equity) }} | 
+                    Difference: ₹{{ "%.2f"|format(total_assets - (total_liabilities + total_equity)) }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('accounting.bulk_update_opening_balances') }}">
+        <!-- Assets -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-blue-600 mb-4">ASSETS</h2>
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Code</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Account Name</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Group</th>
+                        <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Opening Balance</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for account in grouped_accounts.asset %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 text-sm font-mono">{{ account.account_number or account.account_code }}</td>
+                        <td class="px-4 py-2 text-sm">{{ account.name or account.account_name }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">{{ account.description or account.account_group }}</td>
+                        <td class="px-4 py-2 text-right">
+                            <input type="number" name="opening_balance_{{ account.id }}" step="0.01" 
+                                   value="{{ account.opening_balance }}"
+                                   class="w-32 px-2 py-1 border border-gray-300 rounded text-right">
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="{{ url_for('accounting.edit_opening_balance', id=account.id) }}" 
+                               class="text-blue-600 hover:text-blue-800 text-sm">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-blue-50 font-bold">
+                        <td colspan="3" class="px-4 py-3">Total Assets</td>
+                        <td class="px-4 py-3 text-right text-blue-600">₹{{ "%.2f"|format(total_assets) }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Liabilities -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-red-600 mb-4">LIABILITIES</h2>
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Code</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Account Name</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Group</th>
+                        <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Opening Balance</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for account in grouped_accounts.liability %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 text-sm font-mono">{{ account.account_number or account.account_code }}</td>
+                        <td class="px-4 py-2 text-sm">{{ account.name or account.account_name }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">{{ account.description or account.account_group }}</td>
+                        <td class="px-4 py-2 text-right">
+                            <input type="number" name="opening_balance_{{ account.id }}" step="0.01" 
+                                   value="{{ account.opening_balance }}"
+                                   class="w-32 px-2 py-1 border border-gray-300 rounded text-right">
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="{{ url_for('accounting.edit_opening_balance', id=account.id) }}" 
+                               class="text-blue-600 hover:text-blue-800 text-sm">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-red-50 font-bold">
+                        <td colspan="3" class="px-4 py-3">Total Liabilities</td>
+                        <td class="px-4 py-3 text-right text-red-600">₹{{ "%.2f"|format(total_liabilities) }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Equity -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold text-purple-600 mb-4">EQUITY</h2>
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Code</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Account Name</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Group</th>
+                        <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Opening Balance</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for account in grouped_accounts.equity %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 text-sm font-mono">{{ account.account_number or account.account_code }}</td>
+                        <td class="px-4 py-2 text-sm">{{ account.name or account.account_name }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">{{ account.description or account.account_group }}</td>
+                        <td class="px-4 py-2 text-right">
+                            <input type="number" name="opening_balance_{{ account.id }}" step="0.01" 
+                                   value="{{ account.opening_balance }}"
+                                   class="w-32 px-2 py-1 border border-gray-300 rounded text-right">
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="{{ url_for('accounting.edit_opening_balance', id=account.id) }}" 
+                               class="text-blue-600 hover:text-blue-800 text-sm">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="bg-purple-50 font-bold">
+                        <td colspan="3" class="px-4 py-3">Total Equity</td>
+                        <td class="px-4 py-3 text-right text-purple-600">₹{{ "%.2f"|format(total_equity) }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end space-x-4 mb-6">
+            <a href="{{ url_for('accounting.dashboard') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded transition">
+                Cancel
+            </a>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded transition">
+                Save All Opening Balances
+            </button>
+        </div>
+    </form>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+        <p class="text-sm text-blue-800">
+            <strong>Note:</strong> Opening balances should match your previous year's closing balances. 
+            The accounting equation must balance: <strong>Assets = Liabilities + Equity</strong>
+        </p>
+    </div>
+</div>
+{% endblock %}

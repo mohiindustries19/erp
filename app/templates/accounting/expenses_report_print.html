@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses Report - Mohi Industries{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-black text-white p-8">
+    <!-- Print Button -->
+    <div class="fixed top-5 right-5 no-print z-50">
+        <button onclick="window.print()" 
+                class="bg-theme-primary hover:bg-theme-primary-hover text-white font-bold py-3 px-6 rounded-lg shadow-lg border-2 border-theme-primary transition">
+            🖨️ Print Report
+        </button>
+    </div>
+
+    <div class="max-w-7xl mx-auto border-2 border-theme-primary p-8">
+        <!-- Header -->
+        <div class="text-center border-b-2 border-theme-primary pb-6 mb-8">
+            {% if logo_data_uri %}
+            <img src="{{ logo_data_uri }}" alt="{{ company_name }}" class="h-12 mx-auto mb-4">
+            {% endif %}
+            <h1 class="text-4xl font-bold text-theme-primary mb-2">{{ company_name }}</h1>
+            <h2 class="text-2xl font-bold text-white">EXPENSES REPORT</h2>
+        </div>
+
+        <!-- Filter Info -->
+        {% if start_date or end_date or category %}
+        <div class="bg-gray-900 border border-theme-primary rounded-lg p-4 mb-8 text-center">
+            <span class="font-bold">Filters Applied:</span>
+            {% if start_date %}<span class="ml-2">From: {{ start_date }}</span>{% endif %}
+            {% if end_date %}<span class="ml-2">To: {{ end_date }}</span>{% endif %}
+            {% if category %}<span class="ml-2">Category: {{ category }}</span>{% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="bg-gray-900 border-2 border-theme-primary rounded-lg p-6 text-center">
+                <p class="text-sm text-gray-400 mb-2">Total Amount (Excl. GST)</p>
+                <p class="text-3xl font-bold text-theme-primary">₹{{ "%.2f"|format(total_amount) }}</p>
+            </div>
+            <div class="bg-gray-900 border-2 border-theme-primary rounded-lg p-6 text-center">
+                <p class="text-sm text-gray-400 mb-2">Total GST</p>
+                <p class="text-3xl font-bold text-theme-primary">₹{{ "%.2f"|format(total_gst) }}</p>
+            </div>
+            <div class="bg-gray-900 border-2 border-theme-primary rounded-lg p-6 text-center">
+                <p class="text-sm text-gray-400 mb-2">Total Amount (Incl. GST)</p>
+                <p class="text-3xl font-bold text-theme-primary">₹{{ "%.2f"|format(total_with_gst) }}</p>
+            </div>
+        </div>
+
+        <!-- Expenses Table -->
+        <div class="overflow-x-auto mb-8">
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="bg-theme-primary text-white">
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">#</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Expense #</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Date</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Vendor</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Category</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Account</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Description</th>
+                        <th class="border border-theme-primary px-3 py-3 text-left font-bold">Remarks</th>
+                        <th class="border border-theme-primary px-3 py-3 text-right font-bold">Amount</th>
+                        <th class="border border-theme-primary px-3 py-3 text-right font-bold">GST</th>
+                        <th class="border border-theme-primary px-3 py-3 text-right font-bold">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr class="{% if loop.index % 2 == 0 %}bg-black{% else %}bg-gray-900{% endif %}">
+                        <td class="border border-gray-700 px-3 py-2 text-center">{{ loop.index }}</td>
+                        <td class="border border-gray-700 px-3 py-2">{{ expense.expense_number }}</td>
+                        <td class="border border-gray-700 px-3 py-2">{{ expense.expense_date.strftime('%d-%m-%Y') }}</td>
+                        <td class="border border-gray-700 px-3 py-2">{{ expense.vendor_name or '-' }}</td>
+                        <td class="border border-gray-700 px-3 py-2">
+                            <span class="bg-gray-800 border border-theme-primary px-2 py-1 rounded text-xs">
+                                {{ expense.expense_category or 'General' }}
+                            </span>
+                        </td>
+                        <td class="border border-gray-700 px-3 py-2">{{ expense.account.name }}</td>
+                        <td class="border border-gray-700 px-3 py-2">
+                            <div class="max-w-xs break-words">{{ expense.description or '-' }}</div>
+                        </td>
+                        <td class="border border-gray-700 px-3 py-2">
+                            <div class="max-w-xs break-words">{{ expense.remarks or '-' }}</div>
+                        </td>
+                        <td class="border border-gray-700 px-3 py-2 text-right">₹{{ "%.2f"|format(expense.amount) }}</td>
+                        <td class="border border-gray-700 px-3 py-2 text-right">₹{{ "%.2f"|format(expense.total_gst) }}</td>
+                        <td class="border border-gray-700 px-3 py-2 text-right">₹{{ "%.2f"|format(expense.total_amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="bg-theme-primary text-white font-bold text-base">
+                        <td colspan="8" class="border border-theme-primary px-3 py-4 text-right">GRAND TOTAL:</td>
+                        <td class="border border-theme-primary px-3 py-4 text-right">₹{{ "%.2f"|format(total_amount) }}</td>
+                        <td class="border border-theme-primary px-3 py-4 text-right">₹{{ "%.2f"|format(total_gst) }}</td>
+                        <td class="border border-theme-primary px-3 py-4 text-right">₹{{ "%.2f"|format(total_with_gst) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 pt-6 border-t border-theme-primary text-xs text-gray-500">
+            Generated on {{ now().strftime('%d-%m-%Y %H:%M:%S') }} | This is a computer-generated report
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: #000000 !important;
+    }
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+}
+
+/* Theme-aware utility classes */
+.bg-theme-primary {
+    background-color: var(--theme-primary) !important;
+}
+.text-theme-primary {
+    color: var(--theme-primary) !important;
+}
+.border-theme-primary {
+    border-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary-hover:hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+</style>
+{% endblock %}

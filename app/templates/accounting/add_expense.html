@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expense - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Record Expense</h1>
+        <a href="{{ url_for('accounting.list_expenses') }}"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+            ← Back
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form method="POST" action="{{ url_for('accounting.add_expense') }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Expense Date -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Expense Date *</label>
+                    <input type="date" name="expense_date" value="{{ today }}" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <!-- Expense Account -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Expense Account *</label>
+                    <select id="account_id" name="account_id" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Account</option>
+                        {% for account in accounts %}
+                        <option value="{{ account.id }}">{{ account.name }} ({{ account.account_number }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Amount -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (Excl. GST) *</label>
+                    <input type="number" name="amount" step="0.01" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        placeholder="0.00">
+                </div>
+
+                <!-- GST Applicable -->
+                <div class="flex items-center pt-8">
+                    <input type="checkbox" name="is_gst_applicable" id="is_gst_applicable" class="mr-2">
+                    <label for="is_gst_applicable" class="text-sm font-semibold text-gray-700">GST Applicable</label>
+                </div>
+
+                <!-- Vendor Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Vendor Name</label>
+                    <input type="text" name="vendor_name"
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        placeholder="Vendor/Supplier Name">
+                </div>
+
+                <!-- Vendor GSTIN -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Vendor GSTIN</label>
+                    <input type="text" name="vendor_gstin" maxlength="15"
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        placeholder="15-digit GSTIN">
+                </div>
+
+                <!-- Invoice Number -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Invoice Number</label>
+                    <input type="text" name="invoice_number"
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        placeholder="Vendor Invoice #">
+                </div>
+
+                <!-- Invoice Date -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Invoice Date</label>
+                    <input type="date" name="invoice_date"
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <!-- Payment Mode -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Mode *</label>
+                    <select name="payment_mode" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="upi">UPI</option>
+                        <option value="card">Card</option>
+                    </select>
+                </div>
+
+                <!-- Payment Status -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Status *</label>
+                    <select name="payment_status" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+
+                <!-- Reference Number -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Reference Number</label>
+                    <input type="text" name="reference_number"
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        placeholder="Transaction ID / Cheque #">
+                </div>
+
+                <!-- Expense Category -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                    <select id="expense_category" name="expense_category"
+                        class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <option value="">Auto (Recommended)</option>
+                        {% for cat in expense_categories or [] %}
+                        <option value="{{ cat.name }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mt-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                <textarea name="description" rows="2"
+                    class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    placeholder="Brief description of expense"></textarea>
+            </div>
+
+            <!-- Remarks -->
+            <div class="mt-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Remarks</label>
+                <textarea name="remarks" rows="2"
+                    class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    placeholder="Additional notes"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-6 flex justify-end space-x-4">
+                <a href="{{ url_for('accounting.list_expenses') }}"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded transition">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded transition">
+                    Record Expense
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const accountSelect = document.getElementById('account_id');
+        const categorySelect = document.getElementById('expense_category');
+        if (!accountSelect || !categorySelect) return;
+
+        const mapEl = document.getElementById('account_category_map');
+        const map = mapEl ? JSON.parse(mapEl.textContent || '{}') : {};
+
+        function autoFillCategory() {
+            const accountId = accountSelect.value;
+            const suggested = map[String(accountId)] || '';
+            const current = (categorySelect.value || '').trim();
+
+            // Only auto-fill if user hasn't typed something meaningful.
+            if (!suggested) return;
+
+            // Only auto-fill if user hasn't picked something meaningful.
+            if (!current || current.toLowerCase() === 'general') {
+                const exists = Array.from(categorySelect.options).some(o => o.value === suggested);
+                if (!exists) {
+                    const opt = document.createElement('option');
+                    opt.value = suggested;
+                    opt.textContent = suggested;
+                    categorySelect.appendChild(opt);
+                }
+                categorySelect.value = suggested;
+            }
+        }
+
+        accountSelect.addEventListener('change', autoFillCategory);
+        // If page loads with a selected account (rare), still apply.
+        autoFillCategory();
+    })();
+</script>
+
+<script type="application/json" id="account_category_map">{{ (account_category_map or {}) | tojson }}</script>
+{% endblock %}

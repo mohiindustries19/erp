@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Ledger - {{ account.name }} - {{ company_name or 'Mohi Industries' }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        :root {
+            --accent: #2563eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --head: #f3f4f6;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 44px;
+            height: auto;
+        }
+
+        .company {
+            font-size: 14pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 10pt;
+        }
+
+        .meta {
+            text-align: right;
+            color: var(--muted);
+            font-size: 9pt;
+            white-space: nowrap;
+        }
+
+        .info {
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 9.5pt;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 2px 0;
+        }
+
+        .label {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 7px 8px;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--head);
+            font-weight: 700;
+            font-size: 9.5pt;
+        }
+
+        .money {
+            text-align: right;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: nowrap;
+        }
+
+        tfoot td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img class="logo" src="{{ logo_data_uri or url_for('static', filename='logo.png') }}" alt="Logo">
+            <div>
+                <p class="company">{{ company_name or 'Mohi Industries' }}</p>
+                <p class="report">Account Ledger</p>
+            </div>
+        </div>
+        <div class="meta">
+            Period<br>
+            <strong>{{ start_date or '-' }} to {{ end_date or '-' }}</strong>
+        </div>
+    </div>
+
+    <div class="info">
+        <div class="info-row">
+            <div><span class="label">Account:</span> {{ account.name or account.account_name }}</div>
+            <div><span class="label">Code:</span> {{ account.account_number or account.account_code }}</div>
+        </div>
+        <div class="info-row">
+            <div><span class="label">Group:</span> {{ account.description or account.account_group or '-' }}</div>
+            <div><span class="label">Opening Balance:</span> ₹{{ "%.2f"|format(opening_balance) }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Reference</th>
+                <th class="money">Debit</th>
+                <th class="money">Credit</th>
+                <th class="money">Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in entries_with_balance %}
+            <tr>
+                <td>{{ row.entry.entry_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ row.entry.description or '-' }}</td>
+                <td>{{ row.entry.reference_number or (row.entry.reference_type ~ '-' ~ row.entry.reference_id) or '-' }}</td>
+                <td class="money">{% if row.entry.debit and row.entry.debit > 0 %}₹{{ "%.2f"|format(row.entry.debit) }}{% else %}-{% endif %}</td>
+                <td class="money">{% if row.entry.credit and row.entry.credit > 0 %}₹{{ "%.2f"|format(row.entry.credit) }}{% else %}-{% endif %}</td>
+                <td class="money">₹{{ "%.2f"|format(row.balance) }}</td>
+            </tr>
+            {% endfor %}
+            {% if not entries_with_balance %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--muted);">No transactions in this period</td>
+            </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">CLOSING BALANCE</td>
+                <td class="money">₹{{ "%.2f"|format(closing_balance) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | {{ company_name or 'Mohi Industries' }} ERP
+    </div>
+</body>
+</html>

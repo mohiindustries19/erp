@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Email Notifications - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Email Notifications</h1>
+        <p class="text-gray-600 mt-2">Manage automated email notifications and alerts</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Overdue Payments</p>
+            <p class="text-3xl font-bold text-red-600" id="overdueCount">-</p>
+            <p class="text-xs text-gray-500 mt-1">Needs reminder</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Low Stock Items</p>
+            <p class="text-3xl font-bold text-yellow-600" id="lowStockCount">-</p>
+            <p class="text-xs text-gray-500 mt-1">Below reorder level</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Pending Orders</p>
+            <p class="text-3xl font-bold text-blue-600" id="pendingCount">-</p>
+            <p class="text-xs text-gray-500 mt-1">Awaiting confirmation</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <p class="text-gray-600 text-sm uppercase tracking-wide">Active Customers</p>
+            <p class="text-3xl font-bold text-green-600" id="customersCount">-</p>
+            <p class="text-xs text-gray-500 mt-1">With email addresses</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Bulk Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Bulk Actions</h2>
+            <div class="space-y-3">
+                <button onclick="sendBulkPaymentReminders()" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded transition flex items-center justify-between">
+                    <span>Send Payment Reminders</span>
+                    <span class="text-sm">To all overdue orders</span>
+                </button>
+                <button onclick="sendBulkLowStockAlerts()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded transition flex items-center justify-between">
+                    <span>Send Low Stock Alerts</span>
+                    <span class="text-sm">To admin</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Email Configuration -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Email Configuration</h2>
+            <div class="space-y-3">
+                <button onclick="testEmailConfig()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded transition">
+                    Test Email Configuration
+                </button>
+                <div class="bg-gray-50 p-4 rounded">
+                    <p class="text-sm text-gray-700 mb-2"><strong>SMTP Server:</strong> {{ config.MAIL_SERVER }}</p>
+                    <p class="text-sm text-gray-700 mb-2"><strong>Port:</strong> {{ config.MAIL_PORT }}</p>
+                    <p class="text-sm text-gray-700"><strong>From:</strong> {{ config.MAIL_DEFAULT_SENDER }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Settings -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Notification Settings</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded">
+                <div>
+                    <p class="font-semibold text-gray-800">Order Confirmations</p>
+                    <p class="text-sm text-gray-600">Send on order creation</p>
+                </div>
+                <div class="text-2xl">
+                    {% if config.SEND_ORDER_CONFIRMATIONS %}
+                    <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">On</span>
+                    {% else %}
+                    <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-800">Off</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded">
+                <div>
+                    <p class="font-semibold text-gray-800">Payment Reminders</p>
+                    <p class="text-sm text-gray-600">After {{ config.PAYMENT_REMINDER_DAYS }} days</p>
+                </div>
+                <div class="text-2xl">
+                    {% if config.SEND_PAYMENT_REMINDERS %}
+                    <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">On</span>
+                    {% else %}
+                    <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-800">Off</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded">
+                <div>
+                    <p class="font-semibold text-gray-800">Low Stock Alerts</p>
+                    <p class="text-sm text-gray-600">When below reorder level</p>
+                </div>
+                <div class="text-2xl">
+                    {% if config.SEND_LOW_STOCK_ALERTS %}
+                    <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">On</span>
+                    {% else %}
+                    <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-800">Off</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+            <p class="text-sm text-blue-800">
+                <strong>Note:</strong> Email settings can be configured in the <code class="bg-blue-100 px-2 py-1 rounded">.env</code> file. 
+                Restart the application after making changes.
+            </p>
+        </div>
+    </div>
+
+    <!-- Email Templates -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Available Email Templates</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Template</div>
+                <h3 class="font-semibold text-gray-800">Order Confirmation</h3>
+                <p class="text-sm text-gray-600 mt-1">Sent when order is created</p>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Template</div>
+                <h3 class="font-semibold text-gray-800">Payment Receipt</h3>
+                <p class="text-sm text-gray-600 mt-1">Sent when payment received</p>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Template</div>
+                <h3 class="font-semibold text-gray-800">Payment Reminder</h3>
+                <p class="text-sm text-gray-600 mt-1">Sent for overdue payments</p>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Template</div>
+                <h3 class="font-semibold text-gray-800">Low Stock Alert</h3>
+                <p class="text-sm text-gray-600 mt-1">Sent when stock is low</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load stats on page load
+document.addEventListener('DOMContentLoaded', loadStats);
+
+async function loadStats() {
+    try {
+        const response = await fetch('/emails/api/stats');
+        const data = await response.json();
+        
+        document.getElementById('overdueCount').textContent = data.overdue_orders;
+        document.getElementById('lowStockCount').textContent = data.low_stock_products;
+        document.getElementById('pendingCount').textContent = data.pending_orders;
+        document.getElementById('customersCount').textContent = data.active_distributors;
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+async function testEmailConfig() {
+    if (!confirm('Send a test email to verify configuration?')) return;
+    
+    try {
+        const response = await fetch('/emails/test', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Success: ' + data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function sendBulkPaymentReminders() {
+    const overdueCount = document.getElementById('overdueCount').textContent;
+    
+    if (overdueCount === '0') {
+        alert('No overdue payments to send reminders for.');
+        return;
+    }
+    
+    if (!confirm(`Send payment reminders to ${overdueCount} overdue orders?`)) return;
+    
+    try {
+        const response = await fetch('/emails/send/bulk-payment-reminders', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`Sent ${data.count} payment reminders successfully.`);
+            loadStats();
+        } else {
+            alert('Failed to send payment reminders.');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function sendBulkLowStockAlerts() {
+    const lowStockCount = document.getElementById('lowStockCount').textContent;
+    
+    if (lowStockCount === '0') {
+        alert('No low stock items to alert about.');
+        return;
+    }
+    
+    if (!confirm(`Send low stock alerts for ${lowStockCount} products?`)) return;
+    
+    try {
+        const response = await fetch('/emails/send/bulk-low-stock-alerts', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`Sent ${data.count} low stock alerts successfully.`);
+            loadStats();
+        } else {
+            alert('Failed to send low stock alerts.');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

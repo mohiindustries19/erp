@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}e-Invoice - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-gray-900">Generate e-Invoice</h2>
+    <p class="text-gray-500 mt-1">Submit invoice JSON payload</p>
+</div>
+
+<form method="POST" class="bg-white rounded-xl shadow-soft p-6 border border-gray-100">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Invoice JSON</label>
+    <textarea name="invoice_json" rows="10" class="w-full rounded-lg border-gray-300 shadow-sm" placeholder='{"invoice_number":"INV001"}'></textarea>
+    <button type="submit" class="mt-4 px-6 py-2.5 bg-primary-600 text-white rounded-lg">Generate</button>
+</form>
+
+{% if result %}
+<div class="mt-6 bg-white rounded-xl shadow-soft p-6 border border-gray-100">
+    <pre class="text-sm text-gray-800">{{ result | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+{% endblock %}

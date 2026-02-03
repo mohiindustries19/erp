@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Barcode - {{ product.name }} - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-white mb-1">Product Barcode</h2>
+            <p class="text-gray-400 text-sm">{{ product.name }}</p>
+        </div>
+        <a href="{{ url_for('inventory.list_products') }}" 
+           class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg transition font-medium">
+            ← Back to Products
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Current Barcode -->
+        <div class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+            <h3 class="text-xl font-bold text-white mb-4">Current Barcode</h3>
+            
+            {% if product.ean_barcode %}
+            <div class="bg-white rounded-lg p-6 mb-4">
+                <img src="{{ url_for('barcode.get_barcode_image', product_id=product.id) }}" 
+                     alt="Barcode" class="w-full">
+            </div>
+            
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">EAN-13 Code:</span>
+                    <span class="text-white font-mono font-bold">{{ product.ean_barcode }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Source:</span>
+                    <span class="text-white">{{ product.barcode_source|capitalize }}</span>
+                </div>
+                {% if product.barcode_registered_date %}
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Registered:</span>
+                    <span class="text-white">{{ product.barcode_registered_date.strftime('%d-%m-%Y') }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="mt-6 space-y-3">
+                <a href="{{ url_for('barcode.get_barcode_image', product_id=product.id) }}" 
+                   download="{{ product.sku }}_barcode.png"
+                   class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition text-center font-medium">
+                    📥 Download Barcode
+                </a>
+                
+                <a href="{{ url_for('barcode.get_product_label', product_id=product.id) }}" 
+                   download="{{ product.sku }}_label.png"
+                   class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition text-center font-medium">
+                    🏷️ Download Label
+                </a>
+                
+                <button onclick="document.getElementById('printModal').classList.remove('hidden')"
+                        class="block w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition text-center font-medium">
+                    🖨️ Print Labels
+                </button>
+            </div>
+            
+            {% else %}
+            <div class="bg-gray-800 rounded-lg p-8 text-center">
+                <p class="text-gray-400 mb-4">No barcode assigned</p>
+                <p class="text-sm text-gray-500">Generate or enter a barcode below</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Barcode Management -->
+        <div class="space-y-6">
+            <!-- Auto Generate -->
+            <div class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Auto Generate EAN-13</h3>
+                <p class="text-sm text-gray-400 mb-4">Generate sequential barcode with your company prefix</p>
+                
+                <form method="POST" action="{{ url_for('barcode.generate_product_barcode', product_id=product.id) }}">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Company Prefix *</label>
+                            <input type="text" name="company_prefix" value="{{ default_company_prefix }}" maxlength="9"
+                                   class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white font-mono"
+                                   placeholder="890123456">
+                            <p class="text-xs text-gray-500 mt-1">Your GS1 India registered prefix (7-9 digits)</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Source</label>
+                            <select name="barcode_source" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                                <option value="internal">Internal (Testing)</option>
+                                <option value="gs1">GS1 Registered</option>
+                                <option value="reseller">Barcode Reseller</option>
+                            </select>
+                        </div>
+
+                        {% if product.ean_barcode %}
+                        <label class="flex items-center space-x-2 text-sm text-gray-300">
+                            <input type="checkbox" name="replace_existing" class="w-4 h-4 rounded border-gray-700 bg-gray-800 text-theme-primary">
+                            <span>Replace existing barcode (Current: {{ product.ean_barcode }})</span>
+                        </label>
+                        {% endif %}
+                        
+                        <button type="submit" 
+                                class="w-full bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                            ⚡ Generate Barcode
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Manual Entry -->
+            <div class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Manual Entry</h3>
+                <p class="text-sm text-gray-400 mb-4">Enter existing EAN-13 barcode (from GS1 or reseller)</p>
+                
+                <form method="POST" action="{{ url_for('barcode.update_product_barcode', product_id=product.id) }}" id="manualForm">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">EAN-13 Code *</label>
+                            <input type="text" name="ean_barcode" value="{{ product.ean_barcode or '' }}" 
+                                   maxlength="13" pattern="[0-9]{13}" id="eanInput"
+                                   class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white font-mono text-lg"
+                                   placeholder="8901234567890">
+                            <p class="text-xs mt-1" id="validationMsg"></p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Source</label>
+                            <select name="barcode_source" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                                <option value="gs1" {% if product.barcode_source == 'gs1' %}selected{% endif %}>GS1 Registered</option>
+                                <option value="reseller" {% if product.barcode_source == 'reseller' %}selected{% endif %}>Barcode Reseller</option>
+                                <option value="internal" {% if product.barcode_source == 'internal' %}selected{% endif %}>Internal (Testing)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button type="submit" 
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                                💾 Save Barcode
+                            </button>
+                            {% if product.ean_barcode %}
+                            <button type="submit" onclick="document.getElementById('eanInput').value=''"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                                🗑️ Remove
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="mt-8 bg-blue-900 border border-blue-700 rounded-lg p-6">
+        <h4 class="text-lg font-bold text-blue-300 mb-3">📘 About EAN-13 Barcodes</h4>
+        <div class="text-sm text-blue-200 space-y-2">
+            <p><strong>For Retail Sales:</strong> Major retailers (Big Bazaar, Reliance, D-Mart) require GS1-registered EAN-13 barcodes.</p>
+            <p><strong>Get GS1 Registration:</strong> Visit <a href="https://www.gs1india.org" target="_blank" class="underline">www.gs1india.org</a> (₹5,000-₹25,000/year)</p>
+            <p><strong>Company Prefix:</strong> Your unique 7-9 digit prefix from GS1 India</p>
+            <p><strong>Product Code:</strong> Your internal product numbering (3-5 digits)</p>
+            <p><strong>Check Digit:</strong> Automatically calculated for validation</p>
+        </div>
+    </div>
+</div>
+
+<!-- Print Labels Modal -->
+<div id="printModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-white mb-4">Print Barcode Labels</h3>
+        
+        <form action="{{ url_for('barcode.print_product_labels', product_id=product.id) }}" method="GET">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">Number of Labels</label>
+                    <input type="number" name="count" value="10" min="1" max="100"
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">Batch (Optional)</label>
+                    <select name="batch_id" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">
+                        <option value="">No Batch</option>
+                        {% for batch in product.batches %}
+                        <option value="{{ batch.id }}">{{ batch.batch_number }} (Exp: {{ batch.expiry_date.strftime('%d/%m/%Y') }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <p class="text-xs text-gray-400">Labels will be printed on A4 sheet (40mm x 25mm each)</p>
+                
+                <div class="flex space-x-3">
+                    <button type="button" onclick="document.getElementById('printModal').classList.add('hidden')"
+                            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                        🖨️ Print PDF
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Real-time barcode validation
+document.getElementById('eanInput').addEventListener('input', async function() {
+    const eanCode = this.value;
+    const msgEl = document.getElementById('validationMsg');
+    
+    if (eanCode.length !== 13) {
+        msgEl.textContent = 'Must be 13 digits';
+        msgEl.className = 'text-xs mt-1 text-gray-500';
+        return;
+    }
+    
+    if (!/^\d{13}$/.test(eanCode)) {
+        msgEl.textContent = 'Only numbers allowed';
+        msgEl.className = 'text-xs mt-1 text-red-400';
+        return;
+    }
+    
+    // Validate via AJAX
+    try {
+        const response = await fetch('{{ url_for("barcode.validate_barcode") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ean_code: eanCode })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.valid) {
+            msgEl.textContent = '❌ Invalid check digit';
+            msgEl.className = 'text-xs mt-1 text-red-400';
+        } else if (data.exists && data.product !== '{{ product.name }}') {
+            msgEl.textContent = `⚠️ Already used by: ${data.product}`;
+            msgEl.className = 'text-xs mt-1 text-yellow-400';
+        } else {
+            msgEl.textContent = '✅ Valid EAN-13';
+            msgEl.className = 'text-xs mt-1 text-green-400';
+        }
+    } catch (error) {
+        console.error('Validation error:', error);
+    }
+});
+
+// Close modal on outside click
+document.getElementById('printModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.add('hidden');
+    }
+});
+</script>
+
+<style>
+.bg-theme-primary {
+    background-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary-hover:hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+</style>
+{% endblock %}

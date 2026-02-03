@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Expense Voucher {{ expense.expense_number }} - Mohi Industries{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-black text-white p-8">
+    <!-- Print Button -->
+    <div class="fixed top-5 right-5 no-print z-50">
+        <button onclick="window.print()" 
+                class="bg-theme-primary hover:bg-theme-primary-hover text-white font-bold py-3 px-6 rounded-lg shadow-lg border-2 border-theme-primary transition">
+            🖨️ Print Voucher
+        </button>
+    </div>
+
+    <div class="max-w-4xl mx-auto border-2 border-theme-primary p-8">
+        <!-- Header -->
+        <div class="text-center border-b-2 border-theme-primary pb-6 mb-8">
+            {% if logo_data_uri %}
+            <img src="{{ logo_data_uri }}" alt="{{ company_name }}" class="h-12 mx-auto mb-4">
+            {% endif %}
+            <h1 class="text-4xl font-bold text-theme-primary mb-2">{{ company_name }}</h1>
+            <h2 class="text-2xl font-bold text-white">EXPENSE VOUCHER</h2>
+        </div>
+
+        <!-- Voucher Info -->
+        <div class="grid grid-cols-2 gap-6 bg-gray-900 border border-theme-primary rounded-lg p-6 mb-8">
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Voucher Number</p>
+                <p class="text-lg font-bold">{{ expense.expense_number }}</p>
+                <p class="text-xs text-gray-500 mb-1 mt-4">Expense Date</p>
+                <p class="text-lg font-bold">{{ expense.expense_date.strftime('%d-%m-%Y') }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500 mb-1">Category</p>
+                <p class="text-lg font-bold">{{ expense.expense_category or 'General' }}</p>
+                <p class="text-xs text-gray-500 mb-1 mt-4">Payment Status</p>
+                <p class="text-lg font-bold">
+                    <span class="inline-block px-4 py-1 rounded-full text-sm border-2
+                        {% if expense.payment_status == 'paid' %}
+                            bg-green-900 border-green-500 text-green-400
+                        {% else %}
+                            bg-yellow-900 border-yellow-500 text-yellow-400
+                        {% endif %}">
+                        {{ expense.payment_status.upper() }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Vendor Details -->
+        <div class="bg-gray-900 border-2 border-theme-primary rounded-lg p-6 mb-8">
+            <h3 class="text-base font-bold text-theme-primary mb-4 uppercase">Vendor Details</h3>
+            <p class="text-xl font-bold mb-3">{{ expense.vendor_name or 'N/A' }}</p>
+            <div class="text-sm text-gray-300 space-y-1">
+                {% if expense.vendor_gstin %}
+                <p><span class="font-bold">GSTIN:</span> {{ expense.vendor_gstin }}</p>
+                {% endif %}
+                {% if expense.invoice_number %}
+                <p><span class="font-bold">Invoice Number:</span> {{ expense.invoice_number }}</p>
+                {% endif %}
+                {% if expense.invoice_date %}
+                <p><span class="font-bold">Invoice Date:</span> {{ expense.invoice_date.strftime('%d-%m-%Y') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Expense Details -->
+        <div class="mb-8">
+            <table class="w-full">
+                <tr class="border-b border-gray-700">
+                    <td class="py-3 font-bold text-theme-primary w-1/3">Expense Account:</td>
+                    <td class="py-3 text-right">{{ expense.account.name }}</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                    <td class="py-3 font-bold text-theme-primary">Description:</td>
+                    <td class="py-3 text-right">{{ expense.description or '-' }}</td>
+                </tr>
+                {% if expense.remarks %}
+                <tr class="border-b border-gray-700">
+                    <td class="py-3 font-bold text-theme-primary">Remarks:</td>
+                    <td class="py-3 text-right">{{ expense.remarks }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Amount Breakdown -->
+        <div class="bg-gray-900 border-2 border-theme-primary rounded-lg p-6 mb-8">
+            <h3 class="text-base font-bold text-theme-primary mb-4 uppercase">Amount Breakdown</h3>
+            <table class="w-full text-base">
+                <tr class="border-b border-gray-700">
+                    <td class="py-2 font-bold text-gray-300">Base Amount:</td>
+                    <td class="py-2 text-right font-bold">₹{{ "%.2f"|format(expense.amount) }}</td>
+                </tr>
+                {% if expense.is_gst_applicable %}
+                {% if expense.cgst_amount > 0 %}
+                <tr class="border-b border-gray-700">
+                    <td class="py-2 font-bold text-gray-300">CGST:</td>
+                    <td class="py-2 text-right font-bold">₹{{ "%.2f"|format(expense.cgst_amount) }}</td>
+                </tr>
+                <tr class="border-b border-gray-700">
+                    <td class="py-2 font-bold text-gray-300">SGST:</td>
+                    <td class="py-2 text-right font-bold">₹{{ "%.2f"|format(expense.sgst_amount) }}</td>
+                </tr>
+                {% endif %}
+                {% if expense.igst_amount > 0 %}
+                <tr class="border-b border-gray-700">
+                    <td class="py-2 font-bold text-gray-300">IGST:</td>
+                    <td class="py-2 text-right font-bold">₹{{ "%.2f"|format(expense.igst_amount) }}</td>
+                </tr>
+                {% endif %}
+                <tr class="border-b border-gray-700">
+                    <td class="py-2 font-bold text-gray-300">Total GST:</td>
+                    <td class="py-2 text-right font-bold">₹{{ "%.2f"|format(expense.total_gst) }}</td>
+                </tr>
+                {% endif %}
+                <tr class="bg-theme-primary text-white">
+                    <td class="py-4 px-2 font-bold text-lg">TOTAL AMOUNT:</td>
+                    <td class="py-4 px-2 text-right font-bold text-lg">₹{{ "%.2f"|format(expense.total_amount) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Amount in Words -->
+        <div class="bg-gray-900 border border-theme-primary rounded-lg p-6 mb-8 text-center">
+            <p class="text-xs text-gray-500 mb-2">Amount in Words</p>
+            <p class="text-lg font-bold text-theme-primary">Rupees {{ expense.total_amount|int }} Only</p>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="bg-gray-900 border border-theme-primary rounded-lg p-6 mb-8">
+            <h3 class="text-base font-bold text-theme-primary mb-4 uppercase">Payment Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-black p-4 rounded">
+                    <p class="text-xs text-gray-500 mb-1">Payment Mode</p>
+                    <p class="text-base font-bold">{{ expense.payment_mode.upper() if expense.payment_mode else 'N/A' }}</p>
+                </div>
+                <div class="bg-black p-4 rounded">
+                    <p class="text-xs text-gray-500 mb-1">Reference Number</p>
+                    <p class="text-base font-bold">{{ expense.reference_number or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="flex justify-between items-end mt-12 pt-8 border-t border-theme-primary">
+            <div class="text-center w-48">
+                <div class="border-t-2 border-theme-primary pt-2 mt-16">
+                    <p class="font-bold">Prepared By</p>
+                    <p class="text-sm">{{ expense.recorded_by_user.username if expense.recorded_by_user else 'System' }}</p>
+                </div>
+            </div>
+            <div class="text-center w-48">
+                <div class="border-t-2 border-theme-primary pt-2 mt-16">
+                    <p class="font-bold">Approved By</p>
+                    <p class="text-sm">Authorized Signatory</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 pt-6 border-t border-theme-primary text-xs text-gray-500">
+            Generated on {{ now().strftime('%d-%m-%Y %H:%M:%S') }} | This is a computer-generated voucher
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: #000000 !important;
+    }
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+}
+
+/* Theme-aware utility classes */
+.bg-theme-primary {
+    background-color: var(--theme-primary) !important;
+}
+.text-theme-primary {
+    color: var(--theme-primary) !important;
+}
+.border-theme-primary {
+    border-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary-hover:hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+</style>
+{% endblock %}

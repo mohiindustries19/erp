@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800">Edit User - {{ user.username }}</h2>
+    <p class="text-gray-600">Update user account details</p>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <form method="POST" action="{{ url_for('users.edit_user', id=user.id) }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Username *
+                </label>
+                <input type="text" name="username" required value="{{ user.username }}"
+                       class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Full Name *
+                </label>
+                <input type="text" name="full_name" required value="{{ user.full_name or '' }}"
+                       class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Email *
+                </label>
+                <input type="email" name="email" required value="{{ user.email }}"
+                       class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Role *
+                </label>
+                <select name="role" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                    <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    New Password (leave blank to keep current)
+                </label>
+                <input type="password" name="password" minlength="6"
+                       class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       placeholder="Enter new password or leave blank">
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="flex items-center">
+                <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %} class="mr-2">
+                <span class="text-gray-700 text-sm font-bold">User is Active</span>
+            </label>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('users.list_users') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
+                Cancel
+            </a>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+                Update User
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

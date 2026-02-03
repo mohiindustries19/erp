@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Book - {{ company_name or 'Mohi Industries' }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+
+        :root {
+            --accent: #2563eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --head: #f3f4f6;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.35;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 40px;
+            height: auto;
+        }
+
+        .company {
+            font-size: 13pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 9.5pt;
+        }
+
+        .meta {
+            text-align: right;
+            color: var(--muted);
+            font-size: 9pt;
+            white-space: nowrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 6px 7px;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--head);
+            font-weight: 700;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .money {
+            text-align: right;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: nowrap;
+        }
+
+        tfoot td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img class="logo" src="{{ logo_data_uri or url_for('static', filename='logo.png') }}" alt="Logo">
+            <div>
+                <p class="company">{{ company_name or 'Mohi Industries' }}</p>
+                <p class="report">Day Book</p>
+            </div>
+        </div>
+        <div class="meta">
+            Date<br>
+            <strong>{{ selected_date.strftime('%d-%m-%Y') }}</strong>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Account</th>
+                <th>Description</th>
+                <th>Reference</th>
+                <th class="right">Debit</th>
+                <th class="right">Credit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td>{{ entry.entry_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ entry.account_head or '-' }}</td>
+                <td>{{ entry.description or '-' }}</td>
+                <td>{{ entry.reference_number or (entry.reference_type ~ '-' ~ entry.reference_id) or '-' }}</td>
+                <td class="money">{% if entry.debit and entry.debit > 0 %}₹{{ "%.2f"|format(entry.debit) }}{% else %}-{% endif %}</td>
+                <td class="money">{% if entry.credit and entry.credit > 0 %}₹{{ "%.2f"|format(entry.credit) }}{% else %}-{% endif %}</td>
+            </tr>
+            {% endfor %}
+            {% if not entries %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--muted);">No transactions for this date</td>
+            </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">TOTAL</td>
+                <td class="money">₹{{ "%.2f"|format(total_debit) }}</td>
+                <td class="money">₹{{ "%.2f"|format(total_credit) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | {{ company_name or 'Mohi Industries' }} ERP
+    </div>
+</body>
+</html>

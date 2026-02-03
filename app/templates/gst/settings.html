@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}GST Settings - Mohi ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">GST Settings</h1>
+    <div class="flex items-center gap-3">
+      <a href="{{ url_for('gst.dashboard') }}" class="text-sm text-gray-300 hover:text-white">Back to GST</a>
+      <a href="{{ certificate_url }}" target="_blank" class="text-sm text-gray-300 hover:text-white">View Certificate</a>
+    </div>
+  </div>
+
+  <div class="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
+    <h2 class="text-lg font-semibold mb-3">Company GST</h2>
+
+    <form method="post" class="space-y-4">
+      <input type="hidden" name="action" value="save" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">GSTIN</label>
+          <input name="gstin" value="{{ company.gstin or '' }}" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2" placeholder="15-char GSTIN" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">State Code</label>
+          <input name="state_code" value="{{ company.state_code or '' }}" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2" placeholder="e.g. 27" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Save</button>
+      </div>
+    </form>
+
+    <hr class="my-5 border-gray-800" />
+
+    <form method="post" class="space-y-3">
+      <input type="hidden" name="action" value="extract" />
+      <div class="text-sm text-gray-300">
+        Auto-extract GSTIN from the saved certificate PDF: <span class="font-mono">static/docs/MOHI_GST_CERTIFICATE.pdf</span>
+      </div>
+      <button type="submit" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">Extract From Certificate</button>
+    </form>
+
+    {% if extracted_gstin %}
+      <p class="mt-3 text-sm text-gray-300">Extracted GSTIN: <span class="font-mono">{{ extracted_gstin }}</span></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

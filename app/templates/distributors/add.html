@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Add Distributor - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800">Add New Distributor</h2>
+    <p class="text-gray-600">Register a new distributor in the system</p>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <form method="POST" action="{{ url_for('distributor.add_distributor') }}">
+        <!-- Business Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Business Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Business Name *
+                    </label>
+                    <input type="text" name="business_name" required 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="ABC Traders">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Contact Person *
+                    </label>
+                    <input type="text" name="contact_person" required 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="Rajesh Kumar">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Phone Number *
+                    </label>
+                    <input type="tel" name="phone" required 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="+91 9876543210">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Email
+                    </label>
+                    <input type="email" name="email" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="contact@example.com">
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Information -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Compliance Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        GSTIN (15 digits)
+                    </label>
+                    <input type="text" name="gstin" maxlength="15" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="27XXXXX1234X1Z5">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        PAN (10 digits)
+                    </label>
+                    <input type="text" name="pan" maxlength="10" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="ABCDE1234F">
+                </div>
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Address</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Address Line 1
+                    </label>
+                    <input type="text" name="address_line1" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           placeholder="Shop No. 123, Main Road">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            City *
+                        </label>
+                        <input type="text" name="city" required 
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                               placeholder="Mumbai">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            State *
+                        </label>
+                        <input type="text" name="state" required 
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                               placeholder="Maharashtra">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            State Code (GST)
+                        </label>
+                        <input type="text" name="state_code" maxlength="2" 
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                               placeholder="27">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Pincode
+                        </label>
+                        <input type="text" name="pincode" maxlength="6" 
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                               placeholder="400001">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Territory
+                        </label>
+                        <input type="text" name="territory" 
+                               class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                               placeholder="Mumbai Central">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Terms -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Business Terms</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Margin % (12-18%)
+                    </label>
+                    <input type="number" name="margin_percentage" min="12" max="18" step="0.1" value="12" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Credit Limit (₹)
+                    </label>
+                    <input type="number" name="credit_limit" min="0" step="1000" value="0" 
+                           class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Payment Terms
+                    </label>
+                    <select name="payment_terms" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="advance">Advance Payment</option>
+                        <option value="credit">Credit</option>
+                        <option value="cod">Cash on Delivery</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('distributor.list_distributors') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
+                Cancel
+            </a>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
+                Add Distributor
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

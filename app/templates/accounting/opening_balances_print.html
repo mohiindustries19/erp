@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening Balances - Mohi Industries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #ffffff;
+            background: #000000;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #d00000;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            color: #d00000;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 16pt;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .balance-status {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid;
+            font-weight: bold;
+        }
+
+        .balanced {
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .unbalanced {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            background: #d00000;
+            color: #ffffff;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1a1a1a;
+        }
+
+        th {
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #333333;
+        }
+
+        th.right {
+            text-align: right;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #333333;
+        }
+
+        td.right {
+            text-align: right;
+        }
+
+        tbody tr:hover {
+            background: #1a1a1a;
+        }
+
+        .subtotal-row {
+            background: #d00000;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #666666;
+            font-size: 9pt;
+            border-top: 1px solid #333333;
+            padding-top: 10px;
+        }
+
+        @media print {
+            body {
+                background: #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MOHI INDUSTRIES</h1>
+        <h2>Opening Balances</h2>
+    </div>
+
+    <div class="balance-status {% if is_balanced %}balanced{% else %}unbalanced{% endif %}">
+        {% if is_balanced %}
+        ✓ BOOKS ARE BALANCED
+        {% else %}
+        ✗ BOOKS ARE NOT BALANCED
+        {% endif %}
+        <br>
+        <span style="font-size: 9pt;">
+            Assets: ₹{{ "%.2f"|format(total_assets) }} | 
+            Liabilities + Equity: ₹{{ "%.2f"|format(total_liabilities + total_equity) }} | 
+            Difference: ₹{{ "%.2f"|format(total_assets - (total_liabilities + total_equity)) }}
+        </span>
+    </div>
+
+    <!-- Assets Section -->
+    <div class="section">
+        <div class="section-title">ASSETS</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Account Name</th>
+                    <th>Group</th>
+                    <th class="right">Opening Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in grouped_accounts.asset %}
+                <tr>
+                    <td>{{ account.account_number or account.account_code }}</td>
+                    <td>{{ account.name or account.account_name }}</td>
+                    <td>{{ account.description or account.account_group }}</td>
+                    <td class="right">₹{{ "%.2f"|format(account.opening_balance) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="subtotal-row">
+                    <td colspan="3">Total Assets</td>
+                    <td class="right">₹{{ "%.2f"|format(total_assets) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Liabilities Section -->
+    <div class="section">
+        <div class="section-title">LIABILITIES</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Account Name</th>
+                    <th>Group</th>
+                    <th class="right">Opening Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in grouped_accounts.liability %}
+                <tr>
+                    <td>{{ account.account_number or account.account_code }}</td>
+                    <td>{{ account.name or account.account_name }}</td>
+                    <td>{{ account.description or account.account_group }}</td>
+                    <td class="right">₹{{ "%.2f"|format(account.opening_balance) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="subtotal-row">
+                    <td colspan="3">Total Liabilities</td>
+                    <td class="right">₹{{ "%.2f"|format(total_liabilities) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Equity Section -->
+    <div class="section">
+        <div class="section-title">EQUITY</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Account Name</th>
+                    <th>Group</th>
+                    <th class="right">Opening Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in grouped_accounts.equity %}
+                <tr>
+                    <td>{{ account.account_number or account.account_code }}</td>
+                    <td>{{ account.name or account.account_name }}</td>
+                    <td>{{ account.description or account.account_group }}</td>
+                    <td class="right">₹{{ "%.2f"|format(account.opening_balance) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="subtotal-row">
+                    <td colspan="3">Total Equity</td>
+                    <td class="right">₹{{ "%.2f"|format(total_equity) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | Mohi Industries ERP<br>
+        <span style="font-size: 8pt;">Accounting Equation: Assets = Liabilities + Equity</span>
+    </div>
+</body>
+</html>

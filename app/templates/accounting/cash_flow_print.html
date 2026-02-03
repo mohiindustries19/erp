@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Flow Statement - {{ company_name or 'Mohi Industries' }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        :root {
+            --accent: #2563eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --head: #f3f4f6;
+            --good: #059669;
+            --bad: #b91c1c;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 44px;
+            height: auto;
+        }
+
+        .company {
+            font-size: 14pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 10pt;
+        }
+
+        .meta {
+            text-align: right;
+            color: var(--muted);
+            font-size: 9pt;
+            white-space: nowrap;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0 12px 0;
+        }
+
+        .summary-card {
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            padding: 10px;
+        }
+
+        .summary-label {
+            color: var(--muted);
+            font-size: 9pt;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .summary-value {
+            font-size: 14pt;
+            font-weight: 900;
+        }
+
+        .section-title {
+            margin: 12px 0 6px 0;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 11pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 7px 8px;
+        }
+
+        th {
+            background: var(--head);
+            font-weight: 700;
+            font-size: 9.5pt;
+        }
+
+        .money {
+            text-align: right;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: nowrap;
+        }
+
+        tfoot td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img class="logo" src="{{ logo_data_uri or url_for('static', filename='logo.png') }}" alt="Logo">
+            <div>
+                <p class="company">{{ company_name or 'Mohi Industries' }}</p>
+                <p class="report">Cash Flow Statement</p>
+            </div>
+        </div>
+        <div class="meta">
+            Period<br>
+            <strong>{{ start_date.strftime('%d-%m-%Y') }} to {{ end_date.strftime('%d-%m-%Y') }}</strong>
+        </div>
+    </div>
+
+    <div class="summary">
+        <div class="summary-card">
+            <div class="summary-label">Cash Inflow</div>
+            <div class="summary-value" style="color: var(--good);">₹{{ "%.2f"|format(total_inflow) }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Cash Outflow</div>
+            <div class="summary-value" style="color: var(--bad);">₹{{ "%.2f"|format(total_outflow) }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Net Cash Flow</div>
+            <div class="summary-value" style="color: {% if net_cash_flow >= 0 %}var(--good){% else %}var(--bad){% endif %};">₹{{ "%.2f"|format(net_cash_flow) }}</div>
+        </div>
+    </div>
+
+    <div class="section-title">Cash Inflows</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th style="width: 18%">Date</th>
+                <th class="money" style="width: 20%">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in cash_inflows %}
+            <tr>
+                <td>{{ payment.order.distributor.business_name if payment.order else '-' }}</td>
+                <td>{{ payment.payment_date.strftime('%d-%m-%Y') }}</td>
+                <td class="money">₹{{ "%.2f"|format(payment.amount) }}</td>
+            </tr>
+            {% endfor %}
+            {% if not cash_inflows %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--muted);">No cash inflows in this period</td>
+            </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">Total Inflow</td>
+                <td class="money">₹{{ "%.2f"|format(total_inflow) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="section-title">Cash Outflows</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th style="width: 18%">Date</th>
+                <th class="money" style="width: 20%">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in cash_outflows %}
+            <tr>
+                <td>{{ expense.description or expense.vendor_name or '-' }}</td>
+                <td>{{ expense.expense_date.strftime('%d-%m-%Y') }}</td>
+                <td class="money">₹{{ "%.2f"|format(expense.total_amount) }}</td>
+            </tr>
+            {% endfor %}
+            {% if not cash_outflows %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--muted);">No cash outflows in this period</td>
+            </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">Total Outflow</td>
+                <td class="money">₹{{ "%.2f"|format(total_outflow) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="section-title">Net Cash Flow</div>
+    <table>
+        <tbody>
+            <tr>
+                <td><strong>{% if net_cash_flow >= 0 %}Net Cash Inflow{% else %}Net Cash Outflow{% endif %}</strong></td>
+                <td class="money" style="width: 20%; color: {% if net_cash_flow >= 0 %}var(--good){% else %}var(--bad){% endif %};">
+                    ₹{{ "%.2f"|format(net_cash_flow) }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | {{ company_name or 'Mohi Industries' }} ERP
+    </div>
+</body>
+</html>

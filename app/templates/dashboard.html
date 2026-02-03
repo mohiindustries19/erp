@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+{% set _now = now() if now is callable else now %}
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+        <h2 class="text-3xl font-display font-bold text-white tracking-tight">Dashboard</h2>
+        <p class="text-text-secondary mt-1 text-sm font-medium">Overview of your business performance</p>
+    </div>
+    <div
+        class="flex items-center space-x-2 bg-bg-card/50 glass px-4 py-2 rounded-lg border border-border-subtle text-sm font-medium text-text-secondary">
+        <svg class="w-5 h-5 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span>{{ _now.strftime('%B %d, %Y') if _now and _now.strftime is defined else 'Today' }}</span>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Active Distributors -->
+    <div
+        class="glass-card rounded-xl p-6 hover:translate-y-[-2px] transition-transform duration-300 relative group overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-brand-primary" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+            </svg>
+        </div>
+        <div class="flex items-center justify-between relative z-10">
+            <div>
+                <p class="text-text-tertiary text-xs font-bold uppercase tracking-widest">Distributors</p>
+                <p class="text-3xl font-display font-bold text-white mt-2">{{ total_distributors }}</p>
+            </div>
+            <div class="bg-brand-primary/10 rounded-lg p-3 border border-brand-primary/20">
+                <svg class="w-6 h-6 text-brand-primary shadow-glow" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm relative z-10">
+            <span
+                class="text-green-500 flex items-center font-bold text-xs bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+                Active
+            </span>
+            <span class="text-text-tertiary mx-2">•</span>
+            <span class="text-text-secondary text-xs">Across 3 Zones</span>
+        </div>
+    </div>
+
+    <!-- Total Products -->
+    <div
+        class="glass-card rounded-xl p-6 hover:translate-y-[-2px] transition-transform duration-300 relative group overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+        </div>
+        <div class="flex items-center justify-between relative z-10">
+            <div>
+                <p class="text-text-tertiary text-xs font-bold uppercase tracking-widest">Products</p>
+                <p class="text-3xl font-display font-bold text-white mt-2">{{ total_products }}</p>
+            </div>
+            <div class="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
+                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm relative z-10">
+            <a href="{{ url_for('inventory.list_products') }}"
+                class="text-text-secondary hover:text-white font-medium text-xs flex items-center transition-colors">
+                View Catalog <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
+                    </path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Pending Orders -->
+    <div
+        class="glass-card rounded-xl p-6 hover:translate-y-[-2px] transition-transform duration-300 relative group overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                </path>
+            </svg>
+        </div>
+        <div class="flex items-center justify-between relative z-10">
+            <div>
+                <p class="text-text-tertiary text-xs font-bold uppercase tracking-widest">Pending Orders</p>
+                <p class="text-3xl font-display font-bold text-white mt-2">{{ pending_orders }}</p>
+            </div>
+            <div class="bg-orange-500/10 rounded-lg p-3 border border-orange-500/20">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                    </path>
+                </svg>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-sm relative z-10">
+            {% if pending_orders > 0 %}
+            <span
+                class="text-orange-500 flex items-center font-bold text-xs bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Action Required
+            </span>
+            {% else %}
+            <span class="text-green-500 font-medium text-xs flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                All caught up!
+            </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Snapshot -->
+<div class="glass-card rounded-xl border border-border-subtle overflow-hidden mb-8">
+    <div class="px-6 py-5 border-b border-border-subtle flex items-center justify-between bg-bg-card/50">
+        <div>
+            <h3 class="text-lg font-bold text-white">Analytics Snapshot</h3>
+            <p class="text-xs text-text-tertiary mt-1">Quick view of sales & collections</p>
+        </div>
+        <a href="{{ url_for('analytics.dashboard') }}"
+            class="text-xs text-brand-primary hover:text-red-400 font-bold uppercase tracking-wide transition-colors">
+            Open Analytics
+        </a>
+    </div>
+    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-bg-card/40 rounded-xl border border-border-subtle p-4">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-semibold text-text-secondary">Monthly Sales Trend</p>
+                <p class="text-xs text-text-tertiary">Last 12 months</p>
+            </div>
+            <div style="height: 220px;">
+                <canvas id="dashMonthlySalesChart"></canvas>
+            </div>
+            <p id="dashMonthlySalesFallback" class="hidden text-xs text-text-tertiary mt-2">Chart unavailable.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+            <div class="bg-bg-card/40 rounded-xl border border-border-subtle p-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-text-tertiary">Sales (30 Days)</p>
+                <p class="text-2xl font-display font-bold text-white mt-2">₹{{ "%.2f"|format(sales_last_30d or 0) }}</p>
+                <p class="text-xs text-text-tertiary mt-1">Confirmed/Delivered/Completed</p>
+            </div>
+
+            <div class="bg-bg-card/40 rounded-xl border border-border-subtle p-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-text-tertiary">Receivable</p>
+                <p class="text-2xl font-display font-bold text-white mt-2">₹{{ "%.2f"|format(total_receivable or 0) }}</p>
+                <p class="text-xs text-text-tertiary mt-1">Pending/Partial payments</p>
+            </div>
+
+            <div class="bg-bg-card/40 rounded-xl border border-border-subtle p-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-text-tertiary">Collected</p>
+                <p class="text-2xl font-display font-bold text-white mt-2">₹{{ "%.2f"|format(total_collected or 0) }}</p>
+                <p class="text-xs text-text-tertiary mt-1">Cleared payments</p>
+            </div>
+
+            <div class="bg-bg-card/40 rounded-xl border border-border-subtle p-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-text-tertiary">Avg Satisfaction</p>
+                <p class="text-2xl font-display font-bold text-white mt-2">{{ "%.1f"|format(avg_satisfaction or 0) }}/10</p>
+                <p class="text-xs text-text-tertiary mt-1">Across active customers</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Recent Orders -->
+    <div class="lg:col-span-2 glass-card rounded-xl overflow-hidden border border-border-subtle flex flex-col">
+        <div class="px-6 py-5 border-b border-border-subtle flex justify-between items-center bg-bg-card/50">
+            <h3 class="text-lg font-bold text-white">Recent Orders</h3>
+            <a href="{{ url_for('orders.list_orders') }}"
+                class="text-xs text-brand-primary hover:text-red-400 font-bold uppercase tracking-wide transition-colors">View
+                All</a>
+        </div>
+        <div class="overflow-x-auto flex-1">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="bg-bg-subtle/50 text-left">
+                        <th class="px-6 py-3 text-xs font-bold text-text-tertiary uppercase tracking-wider">Order #</th>
+                        <th class="px-6 py-3 text-xs font-bold text-text-tertiary uppercase tracking-wider">Distributor
+                        </th>
+                        <th class="px-6 py-3 text-xs font-bold text-text-tertiary uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-xs font-bold text-text-tertiary uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-xs font-bold text-text-tertiary uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for order in recent_orders %}
+                    <tr class="hover:bg-white/[0.02] transition-colors group">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{{ url_for('orders.view_order', id=order.id) }}"
+                                class="text-brand-primary group-hover:text-red-400 font-mono font-medium transition-colors">
+                                {{ order.order_number }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-text-primary">{{ order.distributor.business_name }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                            {{ order.order_date.strftime('%d %b') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                            ₹{{ "%.2f"|format(order.total_amount) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2.5 py-0.5 inline-flex text-[10px] font-bold uppercase tracking-wide rounded-full border 
+                            {% if order.status == 'confirmed' %}bg-green-500/10 text-green-500 border-green-500/20
+                            {% elif order.status == 'draft' %}bg-zinc-500/10 text-zinc-400 border-zinc-500/20
+                            {% elif order.status == 'pending' %}bg-yellow-500/10 text-yellow-500 border-yellow-500/20
+                            {% else %}bg-blue-500/10 text-blue-500 border-blue-500/20{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5"
+                            class="px-6 py-12 text-center text-text-tertiary flex flex-col items-center justify-center">
+                            <svg class="w-12 h-12 mb-3 text-text-tertiary opacity-20" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                            No recent orders found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-bg-card border border-border-subtle rounded-xl p-6 h-fit">
+        <h3 class="text-lg font-bold text-white mb-6">Quick Actions</h3>
+        <div class="grid grid-cols-1 gap-4">
+            <a href="{{ url_for('orders.add_order') }}"
+                class="group flex items-center p-4 rounded-xl border border-border-subtle hover:border-brand-primary/50 hover:bg-brand-primary/5 transition-all duration-300">
+                <div
+                    class="flex-shrink-0 h-10 w-10 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h4 class="text-sm font-semibold text-white group-hover:text-brand-primary transition-colors">New
+                        Order</h4>
+                    <p class="text-xs text-text-tertiary">Create a new sales order</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('distributor.add_distributor') }}"
+                class="group flex items-center p-4 rounded-xl border border-border-subtle hover:border-orange-500/50 hover:bg-orange-500/5 transition-all duration-300">
+                <div
+                    class="flex-shrink-0 h-10 w-10 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h4 class="text-sm font-semibold text-white group-hover:text-orange-500 transition-colors">Add
+                        Distributor</h4>
+                    <p class="text-xs text-text-tertiary">Onboard a new partner</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('inventory.expiring_batches') }}"
+                class="group flex items-center p-4 rounded-xl border border-border-subtle hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-300">
+                <div
+                    class="flex-shrink-0 h-10 w-10 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h4 class="text-sm font-semibold text-white group-hover:text-red-500 transition-colors">Expiring
+                        Soon</h4>
+                    <p class="text-xs text-text-tertiary">Check stock expiry</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for dashboard analytics snapshot -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const canvas = document.getElementById('dashMonthlySalesChart');
+    const fallback = document.getElementById('dashMonthlySalesFallback');
+    if (!canvas || typeof Chart === 'undefined') {
+        if (fallback) fallback.classList.remove('hidden');
+        return;
+    }
+
+    fetch('/analytics/api/chart-data/monthly_sales')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Sales (₹)',
+                        data: data.values,
+                        borderColor: 'rgba(239, 68, 68, 0.9)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                        tension: 0.35,
+                        fill: true,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'rgba(255,255,255,0.65)', maxRotation: 0 },
+                            grid: { color: 'rgba(255,255,255,0.06)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(255,255,255,0.65)',
+                                callback: (v) => '₹' + Number(v).toLocaleString()
+                            },
+                            grid: { color: 'rgba(255,255,255,0.06)' }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(() => {
+            if (fallback) fallback.classList.remove('hidden');
+        });
+})();
+</script>
+{% endblock %}

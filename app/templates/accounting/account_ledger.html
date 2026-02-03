@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ account.name or account.account_name }} Ledger - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">{{ account.name or account.account_name }}</h1>
+            <p class="text-gray-600">Account Code: {{ account.account_number or account.account_code }} | {{ account.description or account.account_group }}</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('accounting.export_ledger_excel', account_id=account.id, start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', '')) }}" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                📊 Export Excel
+            </a>
+            <a href="{{ url_for('accounting.print_ledger', account_id=account.id, start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', '')) }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                🖨️ Print
+            </a>
+            <a href="{{ url_for('accounting.ledger') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                ← Back to Ledger
+            </a>
+        </div>
+    </div>
+
+    <!-- Balance Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <p class="text-gray-600 text-sm">Opening Balance</p>
+            <p class="text-2xl font-bold text-gray-800">₹{{ "%.2f"|format(opening_balance) }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <p class="text-gray-600 text-sm">Closing Balance</p>
+            <p class="text-2xl font-bold text-green-600">₹{{ "%.2f"|format(closing_balance) }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+            <p class="text-gray-600 text-sm">Total Entries</p>
+            <p class="text-2xl font-bold text-purple-600">{{ entries_with_balance|length }}</p>
+        </div>
+    </div>
+
+    <!-- Ledger Entries -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Reference</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Debit</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Credit</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Balance</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <!-- Opening Balance -->
+                    <tr class="bg-blue-50">
+                        <td class="px-4 py-3 text-sm font-semibold" colspan="5">Opening Balance</td>
+                        <td class="px-4 py-3 text-sm text-right font-bold">₹{{ "%.2f"|format(opening_balance) }}</td>
+                    </tr>
+                    
+                    {% for item in entries_with_balance %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm">{{ item.entry.entry_date.strftime('%d-%m-%Y') }}</td>
+                        <td class="px-4 py-3 text-sm">{{ item.entry.description }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="bg-gray-100 px-2 py-1 rounded text-xs">{{ item.entry.reference_type or '-' }}</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right">
+                            {% if item.entry.debit > 0 %}₹{{ "%.2f"|format(item.entry.debit) }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right">
+                            {% if item.entry.credit > 0 %}₹{{ "%.2f"|format(item.entry.credit) }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right font-semibold">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <!-- Closing Balance -->
+                    <tr class="bg-green-50 font-bold">
+                        <td class="px-4 py-3 text-sm" colspan="5">Closing Balance</td>
+                        <td class="px-4 py-3 text-sm text-right">₹{{ "%.2f"|format(closing_balance) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

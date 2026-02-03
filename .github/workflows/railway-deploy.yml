@@ -1,0 +1,59 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: railway-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js (Railway CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+          RAILWAY_ENVIRONMENT_NAME: ${{ secrets.RAILWAY_ENVIRONMENT_NAME }}
+          RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
+        run: |
+          # Notes:
+          # - Create a Railway project and service first.
+          # - Set GitHub Secrets (Settings -> Secrets and variables -> Actions):
+          #   RAILWAY_TOKEN (required)
+          #   RAILWAY_PROJECT_ID (required)
+          #   RAILWAY_SERVICE_ID (recommended if multiple services)
+          #   RAILWAY_ENVIRONMENT_NAME (optional, defaults to "production")
+          #
+          # This will build from the repo's Dockerfile and deploy.
+
+          railway --version
+
+          if [ -n "${RAILWAY_PROJECT_ID}" ]; then
+            if [ -n "${RAILWAY_ENVIRONMENT_NAME}" ]; then
+              railway link --project "${RAILWAY_PROJECT_ID}" --environment "${RAILWAY_ENVIRONMENT_NAME}" || true
+            else
+              railway link --project "${RAILWAY_PROJECT_ID}" || true
+            fi
+          fi
+
+          if [ -n "${RAILWAY_SERVICE_ID}" ]; then
+            railway up --service "${RAILWAY_SERVICE_ID}"
+          else
+            railway up
+          fi

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Mohi ERP{% endblock %}</title>
+
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script>
+        // Tailwind CDN config must be defined BEFORE loading https://cdn.tailwindcss.com
+        tailwind = window.tailwind || {};
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: 'color-mix(in srgb, var(--theme-primary-light) 18%, white)',
+                            100: 'color-mix(in srgb, var(--theme-primary-light) 28%, white)',
+                            200: 'color-mix(in srgb, var(--theme-primary-light) 38%, white)',
+                            300: 'color-mix(in srgb, var(--theme-primary-light) 55%, white)',
+                            400: 'var(--theme-primary-light)',
+                            500: 'var(--theme-primary)',
+                            600: 'var(--theme-primary)',
+                            700: 'var(--theme-primary-hover)',
+                            800: 'var(--theme-primary-hover)',
+                            900: 'color-mix(in srgb, var(--theme-primary-hover) 85%, black)'
+                        },
+                        // Back-compat tokens used across templates
+                        'dark-bg': 'var(--bg-app)',
+                        'dark-surface': 'var(--bg-card)',
+                        'dark-border': 'var(--border-default)'
+                    },
+                    boxShadow: {
+                        soft: '0 10px 30px rgba(0,0,0,0.25)'
+                    },
+                    fontFamily: {
+                        display: ['Inter', 'system-ui', 'Segoe UI', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <script>
+        // Theme init: default to dark unless user chose otherwise
+        (function () {
+            const stored = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = stored || (prefersDark ? 'dark' : 'dark');
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            localStorage.setItem('theme', theme);
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='simple-erp.css') }}">
+
+    <!-- Dynamic Theme CSS Variables -->
+    <style>
+        :root {
+            --theme-primary: {{ theme_colors['primary'] }};
+            --theme-primary-hover: {{ theme_colors['primary_hover'] }};
+            --theme-primary-light: {{ theme_colors['primary_light'] }};
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (!token) return;
+            document.querySelectorAll('form').forEach((form) => {
+                const method = (form.getAttribute('method') || 'GET').toUpperCase();
+                if (method === 'POST' && !form.querySelector('input[name="csrf_token"]')) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = token;
+                    form.appendChild(input);
+                }
+            });
+        });
+    </script>
+</head>
+
+<body class="bg-bg-app text-text-primary font-sans min-h-screen" x-data="{ sidebarOpen: false }">
+
+    {% if current_user.is_authenticated %}
+    <header class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-bg-card">
+        <div class="flex items-center space-x-2">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="h-7 w-auto" alt="Logo">
+            <span class="font-semibold text-sm">Mohi ERP</span>
+        </div>
+        <button @click="sidebarOpen = !sidebarOpen" class="text-text-secondary hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            class="sidebar fixed lg:static inset-y-0 left-0 z-40 w-64 bg-bg-card border-r border-border-subtle transform transition-transform duration-200 lg:translate-x-0">
+
+            <div class="px-5 py-5 border-b border-border-subtle">
+                <div class="flex items-center space-x-3">
+                    <img src="{{ url_for('static', filename='logo.png') }}" class="h-8 w-auto" alt="Logo">
+                    <div>
+                        <p class="text-sm font-semibold">Mohi ERP</p>
+                        <p class="text-xs text-text-tertiary">Enterprise System</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="px-3 py-4 space-y-1 text-sm">
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Main</p>
+                <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
+
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Sales</p>
+                <a href="{{ url_for('orders.list_orders') }}" class="nav-link {% if 'orders' in request.endpoint %}active{% endif %}">Orders</a>
+                <a href="{{ url_for('distributor.list_distributors') }}" class="nav-link {% if 'distributor' in request.endpoint %}active{% endif %}">Distributors</a>
+
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Purchase</p>
+                <a href="{{ url_for('purchasing.list_purchase_orders') }}" class="nav-link {% if 'purchasing' in request.endpoint %}active{% endif %}">Purchasing</a>
+
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Inventory</p>
+                <a href="{{ url_for('inventory.list_products') }}" class="nav-link {% if 'inventory.list_products' in request.endpoint %}active{% endif %}">Products</a>
+                <a href="{{ url_for('inventory.list_inventory') }}" class="nav-link {% if 'inventory.list_inventory' in request.endpoint %}active{% endif %}">Inventory & Batches</a>
+                <a href="{{ url_for('qc.batches') }}" class="nav-link {% if 'qc' in request.endpoint %}active{% endif %}">Quality Control</a>
+
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Finance</p>
+                <a href="{{ url_for('accounting.dashboard') }}" class="nav-link {% if 'accounting' in request.endpoint %}active{% endif %}">Accounting</a>
+                <a href="{{ url_for('payment.pending_payments') }}" class="nav-link {% if 'payment' in request.endpoint %}active{% endif %}">Payments</a>
+                <a href="{{ url_for('gst.dashboard') }}" class="nav-link {% if 'gst' in request.endpoint %}active{% endif %}">GST</a>
+
+                {% if current_user.role == 'admin' %}
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Documents</p>
+                <a href="{{ url_for('documents.index') }}" class="nav-link {% if 'documents' in request.endpoint %}active{% endif %}">Documents</a>
+                {% endif %}
+
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Intelligence</p>
+
+                <a href="{{ url_for('analytics.dashboard') }}" class="nav-link {% if 'analytics' in request.endpoint and 'advanced' not in request.endpoint %}active{% endif %}">Analytics</a>
+                <a href="{{ url_for('advanced_analytics.dashboard') }}" class="nav-link {% if 'advanced' in request.endpoint %}active{% endif %}">ML Analytics</a>
+                <a href="{{ url_for('ai_chat.chat_page') }}" class="nav-link {% if 'ai_chat' in request.endpoint %}active{% endif %}">AI Chat</a>
+                
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Communication</p>
+                
+                <a href="{{ url_for('whatsapp.dashboard') }}" class="nav-link {% if 'whatsapp' in request.endpoint %}active{% endif %} flex items-center justify-between">
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        WhatsApp
+                    </span>
+                    <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-green-500 text-white rounded-full">NEW</span>
+                </a>
+
+                <div class="my-3 border-t border-border-subtle"></div>
+                <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">System</p>
+                <a href="{{ url_for('settings.theme') }}" class="nav-link {% if 'settings' in request.endpoint %}active{% endif %}">
+                    ⚙️ Settings
+                </a>
+            </nav>
+
+            <div class="mt-auto border-t border-border-subtle p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-bg-elevated text-text-primary flex items-center justify-center text-xs font-semibold">
+                        {{ current_user.username[:2].upper() }}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium truncate">{{ current_user.full_name or current_user.username }}</p>
+                        <p class="text-xs text-text-tertiary truncate">{{ current_user.role|capitalize }}</p>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <a href="{{ url_for('users.profile') }}" class="btn-secondary">Profile</a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn-secondary">Logout</a>
+                </div>
+                <div class="mt-3">
+                    <button type="button" id="themeToggle" class="btn-secondary w-full">
+                        Toggle theme
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-w-0 bg-bg-app">
+            <div class="px-6 py-5 border-b border-border-subtle bg-bg-card">
+                <h1 class="text-lg font-semibold">{% block page_title %}{% endblock %}</h1>
+            </div>
+
+            <div class="px-6 py-6">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="space-y-2 mb-6">
+                    {% for category, message in messages %}
+                    <div class="alert {% if category == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+
+                <footer class="mt-10 pt-4 border-t border-border-subtle">
+                    <p class="text-center text-xs text-text-tertiary">&copy; 2024 Mohi Industries</p>
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <div x-show="sidebarOpen" @click="sidebarOpen = false"
+        x-transition:enter="transition-opacity ease-linear duration-200"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-linear duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-black/60 z-30 lg:hidden"></div>
+    {% endif %}
+
+    {% if not current_user.is_authenticated %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script>
+        // Theme toggle button
+        (function () {
+            const button = document.getElementById('themeToggle');
+            if (!button) return;
+
+            const setLabel = () => {
+                const isDark = document.documentElement.classList.contains('dark');
+                button.textContent = isDark ? '🌙 Dark (click for Light)' : '☀️ Light (click for Dark)';
+            };
+
+            button.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.contains('dark');
+                const next = isDark ? 'light' : 'dark';
+                document.documentElement.classList.toggle('dark', next === 'dark');
+                localStorage.setItem('theme', next);
+                setLabel();
+            });
+
+            setLabel();
+        })();
+    </script>
+
+</body>
+
+</html>

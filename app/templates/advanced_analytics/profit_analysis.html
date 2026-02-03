@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Profit Analysis - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Profit Analysis</h1>
+            <p class="text-gray-600 mt-2">Comprehensive profitability insights by customer and time</p>
+        </div>
+        <a href="{{ url_for('advanced_analytics.dashboard') }}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+            Back to Analytics
+        </a>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="bg-white rounded-lg shadow p-12 text-center">
+        <div class="text-sm text-gray-500 mb-4">Loading...</div>
+        <p class="text-gray-600">Analyzing profit margins and trends...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden bg-red-50 border-l-4 border-red-500 p-6 rounded">
+        <p class="text-red-800" id="errorMessage"></p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Total Revenue</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1" id="totalRevenue">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Estimated Profit</p>
+                <p class="text-2xl font-bold text-green-600 mt-1" id="estimatedProfit">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Profit Margin</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1" id="profitMargin">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-600 text-sm">Total Orders</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1" id="totalOrders">-</p>
+            </div>
+        </div>
+
+        <!-- Monthly Trend Chart -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Monthly Profit Trend</h2>
+            <canvas id="profitChart" height="80"></canvas>
+        </div>
+
+        <!-- Top Customers Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold text-gray-800">Top 10 Profitable Customers</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Order Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTable" class="divide-y divide-gray-200">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let profitChart = null;
+
+function loadProfitAnalysis() {
+    fetch('/advanced-analytics/api/profit-analysis')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').classList.add('hidden');
+            
+            if (!data.success) {
+                document.getElementById('error').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = data.error;
+                return;
+            }
+            
+            displayProfitAnalysis(data.data);
+        })
+        .catch(error => {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = 'Failed to load profit analysis: ' + error.message;
+        });
+}
+
+function displayProfitAnalysis(data) {
+    document.getElementById('results').classList.remove('hidden');
+    
+    // Update summary cards
+    document.getElementById('totalRevenue').textContent = '₹' + data.total_revenue.toLocaleString();
+    document.getElementById('estimatedProfit').textContent = '₹' + data.estimated_profit.toLocaleString();
+    document.getElementById('profitMargin').textContent = data.profit_margin + '%';
+    document.getElementById('totalOrders').textContent = data.total_orders;
+    
+    // Update customers table
+    const tbody = document.getElementById('customersTable');
+    tbody.innerHTML = '';
+    data.top_customers.forEach((customer, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">#${index + 1}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${customer.business_name}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">₹${customer.revenue.toLocaleString()}</td>
+                <td class="px-6 py-4 text-sm font-medium text-green-600">₹${customer.profit.toLocaleString()}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">${customer.orders}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">₹${customer.avg_order_value.toLocaleString()}</td>
+            </tr>
+        `;
+    });
+    
+    // Update chart
+    const ctx = document.getElementById('profitChart').getContext('2d');
+    
+    if (profitChart) {
+        profitChart.destroy();
+    }
+    
+    profitChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.monthly_trend.map(d => d.month),
+            datasets: [
+                {
+                    label: 'Revenue (₹)',
+                    data: data.monthly_trend.map(d => d.revenue),
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Profit (₹)',
+                    data: data.monthly_trend.map(d => d.profit),
+                    backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                    borderColor: 'rgb(34, 197, 94)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Load profit analysis on page load
+window.addEventListener('load', () => {
+    loadProfitAnalysis();
+});
+</script>
+{% endblock %}

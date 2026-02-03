@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Aging Report - {{ company_name or 'Mohi Industries' }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+
+        :root {
+            --accent: #2563eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --head: #f3f4f6;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.35;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 40px;
+            height: auto;
+        }
+
+        .company {
+            font-size: 13pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 9.5pt;
+        }
+
+        .meta {
+            text-align: right;
+            color: var(--muted);
+            font-size: 9pt;
+            white-space: nowrap;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 10px 0 12px 0;
+        }
+
+        .summary-card {
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            padding: 10px;
+        }
+
+        .summary-label {
+            color: var(--muted);
+            font-size: 9pt;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .summary-value {
+            font-size: 12pt;
+            font-weight: 900;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 6px 7px;
+        }
+
+        th {
+            background: var(--head);
+            font-weight: 700;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .money {
+            text-align: right;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: nowrap;
+        }
+
+        tfoot td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img class="logo" src="{{ logo_data_uri or url_for('static', filename='logo.png') }}" alt="Logo">
+            <div>
+                <p class="company">{{ company_name or 'Mohi Industries' }}</p>
+                <p class="report">Accounts Payable Aging</p>
+            </div>
+        </div>
+        <div class="meta">
+            As on<br>
+            <strong>{{ as_on.strftime('%d-%m-%Y') if as_on else as_on }}</strong>
+        </div>
+    </div>
+
+    <div class="summary">
+        {% for label, value in buckets.items() %}
+        <div class="summary-card">
+            <div class="summary-label">{{ label }} days</div>
+            <div class="summary-value">₹{{ "%.2f"|format(value) }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Vendor</th>
+                <th class="right">0-30 Days</th>
+                <th class="right">31-60 Days</th>
+                        <th class="money">0-30</th>
+                        <th class="money">31-60</th>
+                        <th class="money">61-90</th>
+                        <th class="money">90+</th>
+                        <th class="money">Total</th>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.vendor.business_name }}</td>
+                <td class="right">₹{{ "%.2f"|format(row['0-30']) }}</td>
+                <td class="right">₹{{ "%.2f"|format(row['31-60']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(row['0-30']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(row['31-60']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(row['61-90']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(row['90+']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(row.total) }}</td>
+            {% if not rows %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #666666;">No outstanding payables</td>
+            </tr>
+                        <td colspan="6" style="text-align: center; color: var(--muted);">No outstanding payables</td>
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td>TOTAL</td>
+                    <tr>
+                <td class="right">₹{{ "%.2f"|format(buckets['31-60']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(buckets['0-30']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(buckets['31-60']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(buckets['61-90']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(buckets['90+']) }}</td>
+                        <td class="money">₹{{ "%.2f"|format(buckets.values()|sum) }}</td>
+    </table>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | {{ company_name or 'Mohi Industries' }} ERP
+    </div>
+</body>
+</html>

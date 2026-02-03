@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Sheet - {{ company_name or 'Mohi Industries' }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        :root {
+            --accent: #2563eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --head: #f3f4f6;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 44px;
+            height: auto;
+        }
+
+        .company {
+            font-size: 14pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 10pt;
+        }
+
+        .meta {
+            text-align: right;
+            color: var(--muted);
+            font-size: 9pt;
+            white-space: nowrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .section-title {
+            margin: 8px 0 6px 0;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 11pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 7px 8px;
+        }
+
+        th {
+            background: var(--head);
+            font-weight: 700;
+            font-size: 9.5pt;
+        }
+
+        .money {
+            text-align: right;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: nowrap;
+        }
+
+        tfoot td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .totals {
+            margin-top: 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .total-box {
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-weight: 800;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img class="logo" src="{{ logo_data_uri or url_for('static', filename='logo.png') }}" alt="Logo">
+            <div>
+                <p class="company">{{ company_name or 'Mohi Industries' }}</p>
+                <p class="report">Balance Sheet</p>
+            </div>
+        </div>
+        <div class="meta">
+            As on<br>
+            <strong>{{ as_on_date.strftime('%d-%m-%Y') }}</strong>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div>
+            <div class="section-title">Assets</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th class="money" style="width: 26%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assets %}
+                    <tr>
+                        <td>{{ item.account.name or item.account.account_name }}</td>
+                        <td class="money">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not assets %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: var(--muted);">No assets</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total Assets</td>
+                        <td class="money">₹{{ "%.2f"|format(total_assets) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div>
+            <div class="section-title">Liabilities</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th class="money" style="width: 26%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in liabilities %}
+                    <tr>
+                        <td>{{ item.account.name or item.account.account_name }}</td>
+                        <td class="money">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not liabilities %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: var(--muted);">No liabilities</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total Liabilities</td>
+                        <td class="money">₹{{ "%.2f"|format(total_liabilities) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="section-title">Equity</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th class="money" style="width: 26%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in equity %}
+                    <tr>
+                        <td>{{ item.account.name or item.account.account_name }}</td>
+                        <td class="money">₹{{ "%.2f"|format(item.balance) }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not equity %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: var(--muted);">No equity</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total Equity</td>
+                        <td class="money">₹{{ "%.2f"|format(total_equity) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="totals">
+        <div class="total-box">
+            <div>Total Assets</div>
+            <div class="money">₹{{ "%.2f"|format(total_assets) }}</div>
+        </div>
+        <div class="total-box">
+            <div>Total Liabilities + Equity</div>
+            <div class="money">₹{{ "%.2f"|format(total_liabilities + total_equity) }}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | {{ company_name or 'Mohi Industries' }} ERP
+    </div>
+</body>
+</html>

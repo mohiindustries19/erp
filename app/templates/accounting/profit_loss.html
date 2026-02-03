@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Profit & Loss Statement - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Profit & Loss Statement</h1>
+        <div class="flex space-x-2">
+            <form method="POST" action="{{ url_for('accounting.email_profit_loss') }}" class="flex items-center space-x-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="start_date" value="{{ start_date if start_date is string else start_date.strftime('%Y-%m-%d') }}">
+                <input type="hidden" name="end_date" value="{{ end_date if end_date is string else end_date.strftime('%Y-%m-%d') }}">
+                <input type="email" name="email" placeholder="Email (optional)" class="px-3 py-2 border border-gray-300 rounded text-sm w-56" />
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                    ✉️ Email
+                </button>
+            </form>
+            <a href="{{ url_for('accounting.export_profit_loss_excel', start_date=start_date, end_date=end_date) }}" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                📊 Export Excel
+            </a>
+            <a href="{{ url_for('accounting.print_profit_loss', start_date=start_date, end_date=end_date) }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition inline-flex items-center">
+                🖨️ Print
+            </a>
+            <a href="{{ url_for('accounting.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                ← Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Range -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <form method="GET" class="flex items-end gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">From Date</label>
+                <input type="date" name="start_date" value="{{ start_date }}" 
+                       class="px-4 py-2 border border-gray-300 rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">To Date</label>
+                <input type="date" name="end_date" value="{{ end_date }}" 
+                       class="px-4 py-2 border border-gray-300 rounded">
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition">
+                Generate Report
+            </button>
+        </form>
+    </div>
+
+    <!-- P&L Statement -->
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800">Mohi Industries</h2>
+            <p class="text-gray-600">Profit & Loss Statement</p>
+            <p class="text-sm text-gray-500">For the period: {{ start_date.strftime('%d-%m-%Y') }} to {{ end_date.strftime('%d-%m-%Y') }}</p>
+        </div>
+
+        <!-- Income Section -->
+        <div class="mb-8">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">INCOME</h3>
+            <table class="w-full">
+                {% for entry in income_entries %}
+                <tr class="border-b border-gray-200">
+                    <td class="py-2 text-gray-700">{{ entry.account_head }}</td>
+                    <td class="py-2 text-right font-semibold">₹{{ "%.2f"|format(entry.amount) }}</td>
+                </tr>
+                {% endfor %}
+                    <tr class="bg-slate-50 font-bold">
+                    <td class="py-3 text-gray-800">Total Income</td>
+                        <td class="py-3 text-right text-slate-900">₹{{ "%.2f"|format(total_income) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Expenses Section -->
+        <div class="mb-8">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">EXPENSES</h3>
+            <table class="w-full">
+                {% for entry in expense_entries %}
+                <tr class="border-b border-gray-200">
+                    <td class="py-2 text-gray-700">{{ entry.account_head }}</td>
+                    <td class="py-2 text-right font-semibold">₹{{ "%.2f"|format(entry.amount) }}</td>
+                </tr>
+                {% endfor %}
+                    <tr class="bg-slate-50 font-bold">
+                    <td class="py-3 text-gray-800">Total Expenses</td>
+                        <td class="py-3 text-right text-slate-900">₹{{ "%.2f"|format(total_expenses) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Net Profit/Loss -->
+        <div class="border-t border-slate-300 pt-4">
+            <table class="w-full">
+                    <tr class="{% if net_profit >= 0 %}bg-emerald-50{% else %}bg-rose-50{% endif %}">
+                    <td class="py-4 text-xl font-bold text-gray-800">
+                        {% if net_profit >= 0 %}NET PROFIT{% else %}NET LOSS{% endif %}
+                    </td>
+                        <td class="py-4 text-right text-2xl font-bold {% if net_profit >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
+                        ₹{{ "%.2f"|format(net_profit|abs) }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Print Button -->
+        <div class="mt-8 text-center">
+            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded transition">
+                Print Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    nav, footer, button, form { display: none !important; }
+    .bg-white { box-shadow: none !important; }
+}
+</style>
+{% endblock %}

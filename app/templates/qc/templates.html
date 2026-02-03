@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}QC Templates - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-3xl font-display font-bold text-gray-900">QC Templates</h2>
+        <p class="text-gray-500 mt-1">Quality check templates</p>
+    </div>
+    <a href="{{ url_for('qc.add_template') }}" class="px-4 py-2 bg-primary-600 text-white rounded-lg">Add Template</a>
+</div>
+
+<div class="bg-white rounded-xl shadow-soft border border-gray-100 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Name</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Category</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for template in templates %}
+            <tr>
+                <td class="px-4 py-3 text-sm">{{ template.name }}</td>
+                <td class="px-4 py-3 text-sm">{{ template.category.name if template.category else '-' }}</td>
+                <td class="px-4 py-3 text-sm">{{ 'Active' if template.is_active else 'Inactive' }}</td>
+                <td class="px-4 py-3 text-right text-sm">
+                    <a href="{{ url_for('qc.edit_template', id=template.id) }}" class="text-primary-600">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if templates|length == 0 %}
+            <tr>
+                <td colspan="4" class="px-6 py-10 text-center text-gray-500">No templates found.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

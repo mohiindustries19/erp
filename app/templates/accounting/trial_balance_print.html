@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Balance - {{ company_name or 'Mohi Industries' }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        :root {
+            --accent: #2563eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --head: #f3f4f6;
+            --row: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .page {
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .logo {
+            width: 44px;
+            height: auto;
+        }
+
+        .titles {
+            min-width: 0;
+        }
+
+        .company {
+            font-size: 14pt;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 10pt;
+        }
+
+        .meta {
+            text-align: right;
+            color: var(--muted);
+            font-size: 9pt;
+            white-space: nowrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 7px 8px;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--head);
+            font-weight: 700;
+            font-size: 9.5pt;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .money {
+            text-align: right;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: nowrap;
+        }
+
+        tfoot td {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 8.5pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <img class="logo" src="{{ logo_data_uri or url_for('static', filename='logo.png') }}" alt="Logo">
+                <div class="titles">
+                    <p class="company">{{ company_name or 'Mohi Industries' }}</p>
+                    <p class="report">Trial Balance</p>
+                </div>
+            </div>
+            <div class="meta">
+                Period<br>
+                <strong>{{ start_date.strftime('%d-%m-%Y') }} to {{ end_date.strftime('%d-%m-%Y') }}</strong>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 16%">Code</th>
+                    <th>Account</th>
+                    <th style="width: 16%">Type</th>
+                    <th class="right" style="width: 16%">Debit</th>
+                    <th class="right" style="width: 16%">Credit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row.account.account_number or row.account.account_code }}</td>
+                    <td>{{ row.account.name or row.account.account_name }}</td>
+                    <td>{{ row.account.root_type or '' }}</td>
+                    <td class="money">{% if row.debit_balance and row.debit_balance > 0 %}₹{{ "%.2f"|format(row.debit_balance) }}{% else %}-{% endif %}</td>
+                    <td class="money">{% if row.credit_balance and row.credit_balance > 0 %}₹{{ "%.2f"|format(row.credit_balance) }}{% else %}-{% endif %}</td>
+                </tr>
+                {% endfor %}
+                {% if not rows %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--muted);">No accounts found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">TOTAL</td>
+                    <td class="money">₹{{ "%.2f"|format(total_debit) }}</td>
+                    <td class="money">₹{{ "%.2f"|format(total_credit) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer">
+            Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | {{ company_name or 'Mohi Industries' }} ERP
+        </div>
+    </div>
+</body>
+</html>

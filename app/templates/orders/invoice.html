@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ order.order_number }} - Mohi Industries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --page-bg: #f3f4f6;
+            --paper-bg: #ffffff;
+            --ink: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --border-strong: #cbd5e1;
+            --accent: #e01008;
+            --accent-weak: #fce7e6;
+            --accent-border: #f6b7b5;
+            --accent-hover: #a80c06;
+            --danger: #b91c1c;
+            --danger-weak: #fef2f2;
+            --success: #047857;
+            --success-weak: #ecfdf5;
+            --warning: #b45309;
+            --warning-weak: #fffbeb;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: var(--ink);
+            background: var(--page-bg);
+        }
+
+        .invoice-container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            margin: 0 auto;
+            background: var(--paper-bg);
+            position: relative;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(17, 24, 39, 0.10);
+        }
+
+        /* Watermark for unpaid invoices */
+        .invoice-container::before {
+            {% if order.payment_status != 'paid' %}
+            content: "{{ 'UNPAID' if order.payment_status == 'pending' else 'PARTIALLY PAID' }}";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80pt;
+            font-weight: bold;
+            color: rgba(224, 16, 8, 0.08);
+            z-index: 0;
+            pointer-events: none;
+            {% endif %}
+        }
+
+        .invoice-container > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with Logo */
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--border-strong);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-logo {
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .company-name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: var(--ink);
+            margin-bottom: 5px;
+        }
+
+        .company-details {
+            font-size: 9pt;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .invoice-title {
+            text-align: right;
+            flex: 0 0 auto;
+        }
+
+        .invoice-title h1 {
+            font-size: 20pt;
+            font-weight: bold;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .invoice-meta {
+            font-size: 10pt;
+            text-align: right;
+        }
+
+        .invoice-meta p {
+            margin: 3px 0;
+        }
+
+        /* Bill To Section */
+        .billing-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .bill-to, .ship-to {
+            flex: 1;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .ship-to {
+            margin-right: 0;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .party-name {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 10pt;
+        }
+
+        .items-table thead {
+            background: var(--accent-weak);
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .items-table th {
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid var(--border);
+        }
+
+        .items-table th.text-right {
+            text-align: right;
+        }
+
+        .items-table td {
+            padding: 8px;
+            border: 1px solid var(--border);
+            color: var(--ink);
+        }
+
+        .items-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Totals Section */
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .totals-table {
+            width: 50%;
+            font-size: 10pt;
+        }
+
+        .totals-table tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .totals-table td {
+            padding: 8px 10px;
+            color: var(--ink);
+        }
+
+        .totals-table .total-row {
+            background: var(--accent-weak);
+            color: var(--ink);
+            font-weight: bold;
+            font-size: 12pt;
+            border: 1px solid var(--accent);
+        }
+
+        .totals-table .total-row td {
+            border-top: 1px solid var(--accent);
+        }
+
+        /* Amount in Words */
+        .amount-words {
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 10pt;
+            color: var(--ink);
+        }
+
+        .amount-words strong {
+            color: var(--accent);
+        }
+
+        /* Bank Details & Terms */
+        .footer-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 9pt;
+        }
+
+        .bank-details, .terms {
+            flex: 1;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .terms {
+            margin-right: 0;
+        }
+
+        .footer-section h4 {
+            font-size: 10pt;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .footer-section li {
+            margin: 3px 0;
+            padding-left: 12px;
+            position: relative;
+        }
+
+        .footer-section li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Signature */
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .signature-box {
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 200px;
+            border-top: 1px solid var(--border-strong);
+            margin-top: 60px;
+            padding-top: 5px;
+            font-size: 9pt;
+            color: var(--ink);
+        }
+
+        .muted { color: var(--muted); }
+        .text-danger { color: var(--danger); }
+
+        .payment-summary {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            background: var(--accent-weak);
+            border: 1px solid var(--accent-border);
+        }
+
+        .payment-summary-label {
+            font-size: 9pt;
+            font-weight: bold;
+            color: var(--accent);
+            letter-spacing: 0.3px;
+        }
+
+        .payment-summary-due {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-top: 5px;
+            color: var(--danger);
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 9pt;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            color: var(--ink);
+        }
+
+        .chip-pending, .chip-unpaid { background: var(--warning-weak); border-color: #fcd34d; color: var(--warning); }
+        .chip-partial { background: var(--accent-weak); border-color: var(--accent-border); color: var(--accent); }
+        .chip-paid, .chip-completed, .chip-success { background: var(--success-weak); border-color: #a7f3d0; color: var(--success); }
+        .chip-cancelled, .chip-failed { background: var(--danger-weak); border-color: #fecaca; color: var(--danger); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 9pt;
+            font-weight: bold;
+            border: 1px solid var(--accent-border);
+            background: var(--accent-weak);
+            color: var(--accent);
+        }
+        .status-badge.status-cancelled { border-color: #fecaca; background: var(--danger-weak); color: var(--danger); }
+        .status-badge.status-completed,
+        .status-badge.status-delivered { border-color: #a7f3d0; background: var(--success-weak); color: var(--success); }
+
+        .payment-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .payment-section table {
+            width: 100%;
+            font-size: 11pt;
+            color: var(--ink);
+            border-collapse: collapse;
+        }
+        .payment-section td { padding: 5px; }
+        .payment-section .amount {
+            text-align: right;
+            font-size: 13pt;
+            font-weight: bold;
+        }
+        .payment-section .due {
+            text-align: right;
+            font-size: 14pt;
+            font-weight: bold;
+            color: var(--danger);
+        }
+        .payment-section .divider { border-top: 1px solid var(--border); }
+
+        .payment-history { margin: 20px 0; }
+        .payment-history h4 {
+            font-size: 11pt;
+            color: var(--accent);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+        .payment-history table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+        .payment-history thead { background: var(--accent-weak); }
+        .payment-history th {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid var(--border);
+            color: var(--accent);
+        }
+        .payment-history td {
+            padding: 6px;
+            border: 1px solid var(--border);
+            color: var(--ink);
+        }
+        .payment-history td.text-right { text-align: right; font-weight: bold; }
+        .payment-history td.text-center { text-align: center; }
+
+        .remarks {
+            font-size: 9pt;
+            color: var(--muted);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            font-size: 8pt;
+            color: var(--muted);
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: #ffffff;
+            }
+
+            .invoice-container {
+                width: 100%;
+                height: 100%;
+                padding: 15mm;
+                box-shadow: none;
+                border: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            @page {
+                margin: 10mm;
+            }
+        }
+
+        /* Print Button */
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: 2px solid var(--accent);
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            background: var(--accent-hover);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button no-print" onclick="window.print()">Print Invoice</button>
+
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="company-info">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Mohi Industries" class="company-logo">
+                <div class="company-name">MOHI INDUSTRIES</div>
+                <div class="company-details">
+                    4-1, Plot No G-2, Industrial Area Road<br>
+                    Hajipur Industrial Area, Hajipur, Bihar 844102<br>
+                    <strong>Phone:</strong> +91 9262650010 | <strong>Email:</strong> info@mohiindustries.in<br>
+                    <strong>GSTIN:</strong> 10GANPS5418H1ZJ | <strong>FSSAI:</strong> 10423110000282
+                </div>
+            </div>
+            <div class="invoice-title">
+                <h1>TAX INVOICE</h1>
+                <div class="invoice-meta">
+                    <p><strong>Invoice No:</strong> {{ order.order_number }}</p>
+                    <p><strong>Date:</strong> {{ order.order_date.strftime('%d-%m-%Y') }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="status-badge status-{{ order.status }}">{{ order.status.upper() }}</span>
+                    </p>
+                </div>
+                <!-- Payment Status Badge -->
+                {% set outstanding = order.total_amount - order.paid_amount %}
+                <div class="payment-summary">
+                    <div class="payment-summary-label">
+                        {% if order.payment_status == 'paid' %}
+                            PAID IN FULL
+                        {% elif order.payment_status == 'partial' %}
+                            PARTIALLY PAID
+                        {% else %}
+                            PAYMENT PENDING
+                        {% endif %}
+                    </div>
+                    {% if outstanding > 0 %}
+                    <div class="payment-summary-due">
+                        Due: ₹{{ "%.2f"|format(outstanding) }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Section -->
+        <div class="billing-section">
+            <div class="bill-to">
+                <div class="section-title">Bill To</div>
+                <div class="party-name">{{ order.distributor.business_name }}</div>
+                <div>
+                    {{ order.distributor.address_line1 }}<br>
+                    {% if order.distributor.address_line2 %}{{ order.distributor.address_line2 }}<br>{% endif %}
+                    {{ order.distributor.city }}, {{ order.distributor.state }} - {{ order.distributor.pincode }}<br>
+                    <strong>GSTIN:</strong> {{ order.distributor.gstin or 'Unregistered' }}<br>
+                    <strong>Contact:</strong> {{ order.distributor.contact_person }}<br>
+                    <strong>Phone:</strong> {{ order.distributor.phone }}
+                </div>
+            </div>
+            <div class="ship-to">
+                <div class="section-title">Ship To</div>
+                <div class="party-name">{{ order.distributor.business_name }}</div>
+                <div>
+                    {% if order.delivery_address %}
+                        {{ order.delivery_address }}
+                    {% else %}
+                        {{ order.distributor.address_line1 }}<br>
+                        {% if order.distributor.address_line2 %}{{ order.distributor.address_line2 }}<br>{% endif %}
+                        {{ order.distributor.city }}, {{ order.distributor.state }} - {{ order.distributor.pincode }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 30%;">Product Description</th>
+                    <th style="width: 10%;">HSN/SAC</th>
+                    <th class="text-right" style="width: 8%;">Qty</th>
+                    <th class="text-right" style="width: 10%;">Rate</th>
+                    <th class="text-right" style="width: 8%;">Disc%</th>
+                    <th class="text-right" style="width: 12%;">Taxable</th>
+                    <th class="text-right" style="width: 7%;">GST%</th>
+                    <th class="text-right" style="width: 10%;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>
+                        <strong>{{ item.product.name }}</strong><br>
+                        <small class="muted">SKU: {{ item.product.sku }}</small>
+                    </td>
+                    <td>{{ item.hsn_code }}</td>
+                    <td class="text-right">{{ item.quantity }}</td>
+                    <td class="text-right">₹{{ "%.2f"|format(item.unit_price) }}</td>
+                    <td class="text-right">{{ item.discount_percent }}%</td>
+                    <td class="text-right">₹{{ "%.2f"|format(item.line_total) }}</td>
+                    <td class="text-right">{{ item.gst_rate }}%</td>
+                    <td class="text-right"><strong>₹{{ "%.2f"|format(item.line_total * (1 + item.gst_rate/100)) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td>Subtotal:</td>
+                    <td class="text-right">₹{{ "%.2f"|format(order.subtotal) }}</td>
+                </tr>
+                {% if order.discount_amount > 0 %}
+                <tr>
+                    <td>Discount:</td>
+                    <td class="text-right text-danger">- ₹{{ "%.2f"|format(order.discount_amount) }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Taxable Amount:</td>
+                    <td class="text-right">₹{{ "%.2f"|format(order.taxable_amount) }}</td>
+                </tr>
+                {% if order.cgst_amount > 0 %}
+                <tr>
+                    <td>CGST:</td>
+                    <td class="text-right">₹{{ "%.2f"|format(order.cgst_amount) }}</td>
+                </tr>
+                <tr>
+                    <td>SGST:</td>
+                    <td class="text-right">₹{{ "%.2f"|format(order.sgst_amount) }}</td>
+                </tr>
+                {% endif %}
+                {% if order.igst_amount > 0 %}
+                <tr>
+                    <td>IGST:</td>
+                    <td class="text-right">₹{{ "%.2f"|format(order.igst_amount) }}</td>
+                </tr>
+                {% endif %}
+                <tr class="total-row">
+                    <td><strong>INVOICE AMOUNT:</strong></td>
+                    <td class="text-right"><strong>₹{{ "%.2f"|format(order.total_amount) }}</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Payment Status Section -->
+        {% set outstanding = order.total_amount - order.paid_amount %}
+        <div class="payment-section">
+            <table>
+                <tr>
+                    <td style="padding: 5px;"><strong>Payment Status:</strong></td>
+                    <td style="padding: 5px; text-align: right;">
+                        <span class="chip chip-{{ order.payment_status }}">
+                            {{ order.payment_status.upper() }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px;"><strong>Amount Paid:</strong></td>
+                    <td class="amount">₹{{ "%.2f"|format(order.paid_amount) }}</td>
+                </tr>
+                <tr class="divider">
+                    <td style="padding: 5px;"><strong>Balance Due:</strong></td>
+                    <td class="due">₹{{ "%.2f"|format(outstanding) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Payment History (if any) -->
+        {% if order.payments %}
+        <div class="payment-history">
+            <h4>PAYMENT HISTORY</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Payment #</th>
+                        <th>Mode</th>
+                        <th>Reference</th>
+                        <th class="text-right">Amount</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in order.payments %}
+                    <tr>
+                        <td>{{ payment.payment_date.strftime('%d-%m-%Y') }}</td>
+                        <td>{{ payment.payment_number }}</td>
+                        <td>{{ payment.payment_mode.upper() }}</td>
+                        <td>{{ payment.reference_number or '-' }}</td>
+                        <td class="text-right">₹{{ "%.2f"|format(payment.amount) }}</td>
+                        <td class="text-center">
+                            <span class="chip chip-{{ payment.status }}">
+                                {{ payment.status.upper() }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Amount in Words -->
+        <div class="amount-words">
+            <strong>Amount in Words:</strong> Rupees {{ order.total_amount|int }} Only
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer-section">
+            <div class="bank-details">
+                <h4>Bank Details</h4>
+                <p><strong>Bank Name:</strong> State Bank of India</p>
+                <p><strong>Account No:</strong> 1234567890</p>
+                <p><strong>IFSC Code:</strong> SBIN0001234</p>
+                <p><strong>Branch:</strong> Hajipur</p>
+            </div>
+            <div class="terms">
+                <h4>Terms & Conditions</h4>
+                <ul>
+                    <li>Goods once sold will not be taken back</li>
+                    <li>Subject to Hajipur jurisdiction</li>
+                    <li>Payment as per agreed terms</li>
+                    <li>E. & O.E.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Signature -->
+        <div class="signature-section">
+            <div>
+                <p class="remarks">
+                    <strong>Remarks:</strong> {{ order.remarks or 'Thank you for your business!' }}
+                </p>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">
+                    <strong>For Mohi Industries</strong><br>
+                    Authorized Signatory
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="footer-note">
+            This is a computer-generated invoice and does not require a signature
+        </div>
+    </div>
+</body>
+</html>

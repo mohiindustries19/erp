@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}New Order - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-white tracking-tight">Create New Order</h2>
+    <p class="text-text-secondary mt-1">Add a new order for a distributor</p>
+</div>
+
+<div class="" x-data="orderForm()">
+    <form method="POST" action="{{ url_for('orders.add_order') }}" @submit="prepareSubmit" class="space-y-6">
+        <!-- Hidden field for items JSON -->
+        <input type="hidden" name="items_json" x-model="itemsJSON">
+
+        <!-- Distributor Selection -->
+        <div class="glass-card rounded-xl p-6 border border-border-subtle">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                <div class="bg-brand-primary/10 p-2 rounded-lg mr-3 text-brand-primary border border-brand-primary/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                        </path>
+                    </svg>
+                </div>
+                Distributor Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Select Distributor *</label>
+                    <select name="distributor_id" required
+                        class="w-full rounded-lg border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white transition-all h-11">
+                        <option value="">-- Select Distributor --</option>
+                        {% for dist in distributors %}
+                        <option value="{{ dist.id }}">{{ dist.code }} - {{ dist.business_name }} ({{ dist.city }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Information -->
+        <div class="glass-card rounded-xl p-6 border border-border-subtle">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                <div class="bg-orange-500/10 p-2 rounded-lg mr-3 text-orange-500 border border-orange-500/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                        </path>
+                    </svg>
+                </div>
+                Order Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Order Date *</label>
+                    <input type="date" name="order_date" required value="{{ today }}"
+                        class="w-full rounded-lg border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white transition-all h-11">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Order Type *</label>
+                    <select name="order_type" required
+                        class="w-full rounded-lg border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white transition-all h-11">
+                        <option value="regular">Regular Order</option>
+                        <option value="daily_bakery">Daily Bakery</option>
+                        <option value="bulk">Bulk Order</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Payment Terms *</label>
+                    <select name="payment_terms" required
+                        class="w-full rounded-lg border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white transition-all h-11">
+                        <option value="advance">Advance Payment</option>
+                        <option value="credit">Credit</option>
+                        <option value="cod">Cash on Delivery</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="glass-card rounded-xl p-6 border border-border-subtle">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center">
+                    <div class="bg-green-500/10 p-2 rounded-lg mr-3 text-green-500 border border-green-500/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                    </div>
+                    Order Items
+                </h3>
+                <button type="button" @click="addItem()"
+                    class="inline-flex items-center px-4 py-2 bg-green-600/90 text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-green-600 transition-colors shadow-lg shadow-green-600/20">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Item
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-border-subtle rounded-lg">
+                <table class="min-w-full">
+                    <thead class="bg-bg-subtle/50">
+                        <tr>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-bold text-text-tertiary uppercase tracking-wider w-1/3">
+                                Product</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-bold text-text-tertiary uppercase tracking-wider">
+                                Quantity</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-bold text-text-tertiary uppercase tracking-wider">
+                                Unit Price</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-bold text-text-tertiary uppercase tracking-wider">
+                                Discount %</th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-bold text-text-tertiary uppercase tracking-wider">
+                                Line Total</th>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-bold text-text-tertiary uppercase tracking-wider">
+                                Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-subtle bg-bg-card/30">
+                        <template x-for="(item, index) in items" :key="index">
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="px-4 py-2">
+                                    <select x-model="item.product_id" @change="updatePrice(index, $event)"
+                                        class="w-full rounded border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white text-sm transition-all">
+                                        <option value="">-- Select Product --</option>
+                                        {% for product in products %}
+                                        <option value="{{ product.id }}" data-price="{{ product.base_price }}"
+                                            data-gst="{{ product.gst_rate }}">
+                                            {{ product.sku }} - {{ product.name }} (₹{{
+                                            "%.2f"|format(product.base_price) }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" x-model="item.quantity" @input="calculateLineTotal(index)"
+                                        min="1"
+                                        class="w-full rounded border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white text-sm transition-all">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" x-model="item.unit_price" @input="calculateLineTotal(index)"
+                                        step="0.01"
+                                        class="w-full rounded border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white text-sm transition-all">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <input type="number" x-model="item.discount" @input="calculateLineTotal(index)"
+                                        min="0" max="100" step="0.1"
+                                        class="w-full rounded border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white text-sm transition-all">
+                                </td>
+                                <td class="px-4 py-2">
+                                    <span class="font-mono font-medium text-white"
+                                        x-text="'₹' + item.line_total.toFixed(2)"></span>
+                                </td>
+                                <td class="px-4 py-2 text-center">
+                                    <button type="button" @click="removeItem(index)"
+                                        class="text-red-500 hover:text-red-400 bg-red-500/10 hover:bg-red-500/20 p-1.5 rounded-lg transition-colors border border-transparent hover:border-red-500/30">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+
+                        <tr x-show="items.length === 0">
+                            <td colspan="6" class="px-6 py-10 text-center text-text-tertiary">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-12 h-12 text-text-tertiary opacity-20 mb-3" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                    <p>No items added yet.</p>
+                                    <button type="button" @click="addItem()"
+                                        class="mt-2 text-brand-primary hover:text-white text-sm font-medium transition-colors">Add
+                                        your first item</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Remarks -->
+            <div class="glass-card rounded-xl p-6 border border-border-subtle">
+                <h3 class="text-lg font-bold text-white mb-4">Remarks</h3>
+                <textarea name="remarks" rows="6"
+                    class="w-full rounded-lg border-border-default shadow-sm focus:border-brand-primary focus:ring-brand-primary bg-bg-subtle text-white transition-all"
+                    placeholder="Any special instructions, delivery notes, or comments..."></textarea>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-bg-subtle/30 rounded-xl p-6 border border-border-subtle">
+                <h3 class="text-lg font-bold text-white mb-4 border-b border-border-subtle pb-2">Order Summary</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-text-secondary">
+                        <span>Subtotal</span>
+                        <span class="font-medium font-mono text-white" x-text="'₹' + subtotal.toFixed(2)"></span>
+                    </div>
+                    <div class="flex justify-between text-text-secondary">
+                        <span>GST (Est. 12%)</span>
+                        <span class="font-medium font-mono text-white" x-text="'₹' + gstAmount.toFixed(2)"></span>
+                    </div>
+                    <div class="border-t border-border-default pt-3 mt-3">
+                        <div class="flex justify-between text-xl font-bold text-white">
+                            <span>Total Amount</span>
+                            <span class="font-mono text-brand-primary" x-text="'₹' + totalAmount.toFixed(2)"></span>
+                        </div>
+                    </div>
+
+                    <div class="bg-bg-elevated border border-border-subtle rounded-lg p-3 mt-4">
+                        <div x-show="totalAmount < 25000" class="flex items-center text-red-500 text-sm font-medium">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            Minimum order value is ₹25,000
+                        </div>
+                        <div x-show="totalAmount >= 25000" class="flex items-center text-green-500 text-sm font-medium">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Order meets minimum requirement
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-border-subtle">
+            <a href="{{ url_for('orders.list_orders') }}"
+                class="px-6 py-2.5 border border-border-default text-text-secondary font-medium rounded-lg hover:bg-white/5 hover:text-white transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-brand-primary to-orange-600 border border-transparent rounded-lg font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-brand-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="items.length === 0 || totalAmount < 25000">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Create Order
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function orderForm() {
+        return {
+            items: [],
+            subtotal: 0,
+            gstAmount: 0,
+            totalAmount: 0,
+            itemsJSON: '[]',
+
+            addItem() {
+                this.items.push({
+                    product_id: '',
+                    quantity: 1,
+                    unit_price: 0,
+                    discount: 0,
+                    gst_rate: 0,
+                    line_total: 0
+                });
+            },
+
+            removeItem(index) {
+                this.items.splice(index, 1);
+                this.calculateTotals();
+            },
+
+            updatePrice(index, event) {
+                const item = this.items[index];
+                const select = event.target;
+                const option = select.options[select.selectedIndex];
+
+                if (option.value) {
+                    item.unit_price = parseFloat(option.dataset.price) || 0;
+                    item.gst_rate = parseFloat(option.dataset.gst) || 0;
+                    this.calculateLineTotal(index);
+                }
+            },
+
+            calculateLineTotal(index) {
+                const item = this.items[index];
+                const quantity = parseFloat(item.quantity) || 0;
+                const price = parseFloat(item.unit_price) || 0;
+                const discount = parseFloat(item.discount) || 0;
+
+                item.line_total = quantity * price * (1 - discount / 100);
+                this.calculateTotals();
+            },
+
+            calculateTotals() {
+                this.subtotal = this.items.reduce((sum, item) => sum + item.line_total, 0);
+
+                // Estimate GST (average 12%)
+                this.gstAmount = this.subtotal * 0.12;
+                this.totalAmount = this.subtotal + this.gstAmount;
+            },
+
+            prepareSubmit(e) {
+                // Convert items to JSON before submit
+                this.itemsJSON = JSON.stringify(this.items);
+
+                // Validate
+                if (this.items.length === 0) {
+                    e.preventDefault();
+                    alert('Please add at least one item to the order!');
+                    return false;
+                }
+
+                if (this.totalAmount < 25000) {
+                    if (!confirm('Order is below minimum value of ₹25,000. Continue anyway?')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+    }
+</script>
+{% endblock %}

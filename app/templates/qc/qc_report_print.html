@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC Report - Batch {{ batch.batch_number }} - Mohi Industries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #ffffff;
+            background: #000000;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #d00000;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            color: #d00000;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 16pt;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .batch-number {
+            font-size: 14pt;
+            color: #d00000;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-passed {
+            background: #00ff00;
+            color: #000000;
+        }
+
+        .status-failed {
+            background: #ff0000;
+            color: #ffffff;
+        }
+
+        .status-pending {
+            background: #ffaa00;
+            color: #000000;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            background: #d00000;
+            color: #ffffff;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 10px;
+            border: 1px solid #333333;
+        }
+
+        .info-label {
+            color: #d00000;
+            font-weight: bold;
+            font-size: 9pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-size: 11pt;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .qc-check {
+            border: 1px solid #333333;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #1a1a1a;
+        }
+
+        .qc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .qc-template {
+            color: #d00000;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+
+        .qc-date {
+            color: #999999;
+            font-size: 9pt;
+        }
+
+        .qc-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .qc-detail {
+            padding: 8px;
+            background: #000000;
+            border: 1px solid #333333;
+        }
+
+        .qc-remarks {
+            padding: 10px;
+            background: #000000;
+            border: 1px solid #333333;
+            margin-top: 10px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666666;
+            font-size: 9pt;
+            border-top: 1px solid #333333;
+            padding-top: 10px;
+        }
+
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #666666;
+            margin-top: 50px;
+            padding-top: 10px;
+            color: #999999;
+            font-size: 10pt;
+        }
+
+        @media print {
+            body {
+                background: #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MOHI INDUSTRIES</h1>
+        <h2>Quality Control Report</h2>
+        <div class="batch-number">Batch: {{ batch.batch_number }}</div>
+        <div class="status-badge status-{{ batch.qc_status }}">
+            {{ batch.qc_status|upper }}
+        </div>
+    </div>
+
+    <!-- Batch Information -->
+    <div class="section">
+        <div class="section-title">BATCH INFORMATION</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Batch Number</div>
+                <div class="info-value">{{ batch.batch_number }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Product</div>
+                <div class="info-value">{{ batch.product.name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Manufacturing Date</div>
+                <div class="info-value">{{ batch.manufacturing_date.strftime('%d-%m-%Y') }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Expiry Date</div>
+                <div class="info-value">{{ batch.expiry_date.strftime('%d-%m-%Y') }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Quantity Produced</div>
+                <div class="info-value">{{ batch.quantity_produced }} {{ batch.product.unit }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Quantity Available</div>
+                <div class="info-value">{{ batch.quantity_available }} {{ batch.product.unit }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Warehouse</div>
+                <div class="info-value">{{ batch.warehouse.name if batch.warehouse else '-' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">QC Status</div>
+                <div class="info-value">{{ batch.qc_status|upper }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QC Checks -->
+    <div class="section">
+        <div class="section-title">QUALITY CHECKS</div>
+        {% if qc_checks %}
+            {% for qc in qc_checks %}
+            <div class="qc-check">
+                <div class="qc-header">
+                    <div class="qc-template">{{ qc.template.name }}</div>
+                    <div class="qc-date">{{ qc.checked_at.strftime('%d-%m-%Y %H:%M') }}</div>
+                </div>
+                <div class="qc-details">
+                    <div class="qc-detail">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">{{ qc.status|upper }}</div>
+                    </div>
+                    <div class="qc-detail">
+                        <div class="info-label">Checked By</div>
+                        <div class="info-value">{{ qc.checker.username if qc.checker else '-' }}</div>
+                    </div>
+                    <div class="qc-detail">
+                        <div class="info-label">Template</div>
+                        <div class="info-value">{{ qc.template.name }}</div>
+                    </div>
+                </div>
+                {% if qc.remarks %}
+                <div class="qc-remarks">
+                    <div class="info-label">Remarks</div>
+                    <div class="info-value">{{ qc.remarks }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; color: #666666; padding: 30px;">
+                No quality checks performed yet
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Overall Remarks -->
+    {% if batch.qc_remarks %}
+    <div class="section">
+        <div class="section-title">OVERALL REMARKS</div>
+        <div style="padding: 15px; border: 1px solid #333333; background: #1a1a1a;">
+            <div class="info-value">{{ batch.qc_remarks }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line">QC Inspector</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">Production Manager</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | Mohi Industries ERP
+    </div>
+</body>
+</html>

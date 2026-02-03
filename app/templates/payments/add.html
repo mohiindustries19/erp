@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Record Payment</h2>
+    <p class="text-gray-600 dark:text-gray-400">Record payment for Order {{ order.order_number }}</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Order Summary -->
+    <div class="lg:col-span-1">
+        <div
+            class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Order Summary</h3>
+            <div class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                <p><strong>Order #:</strong> <span class="text-gray-900 dark:text-white">{{ order.order_number }}</span>
+                </p>
+                <p><strong>Distributor:</strong> <span class="text-gray-900 dark:text-white">{{
+                        order.distributor.business_name }}</span></p>
+                <p><strong>Order Date:</strong> <span class="text-gray-900 dark:text-white">{{
+                        order.order_date.strftime('%d-%m-%Y') }}</span></p>
+                <hr class="my-3 border-gray-200 dark:border-gray-700">
+                <p><strong>Total Amount:</strong> <span class="text-lg text-gray-900 dark:text-white">₹{{
+                        "%.2f"|format(order.total_amount) }}</span></p>
+                <p><strong>Paid Amount:</strong> <span class="text-green-600 dark:text-green-400">₹{{
+                        "%.2f"|format(order.paid_amount) }}</span></p>
+                <p><strong>Outstanding:</strong> <span class="text-red-600 dark:text-red-400 text-lg font-bold">₹{{
+                        "%.2f"|format(outstanding) }}</span></p>
+            </div>
+        </div>
+
+        <!-- Previous Payments -->
+        {% if order.payments %}
+        <div
+            class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6 mt-4">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Previous Payments</h3>
+            <div class="space-y-2 text-sm">
+                {% for payment in order.payments %}
+                <div class="border-b dark:border-gray-700 pb-2">
+                    <p class="text-gray-900 dark:text-white"><strong>{{ payment.payment_number }}</strong></p>
+                    <p class="text-gray-700 dark:text-gray-300">₹{{ "%.2f"|format(payment.amount) }} - <span
+                            class="text-gray-500 dark:text-gray-400">{{ payment.payment_mode.upper() }}</span></p>
+                    <p class="text-xs text-gray-600 dark:text-gray-500">{{ payment.payment_date.strftime('%d-%m-%Y') }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Payment Form -->
+    <div class="lg:col-span-2">
+        <div
+            class="bg-white dark:bg-dark-surface rounded-lg shadow dark:shadow-none border border-transparent dark:border-dark-border p-6">
+            <form method="POST" action="{{ url_for('payment.add_payment', order_id=order.id) }}" x-data="paymentForm()">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Payment Date *
+                        </label>
+                        <input type="date" name="payment_date" required value="{{ today }}"
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Amount *
+                        </label>
+                        <input type="number" name="amount" min="0.01" step="0.01" max="{{ outstanding }}" required
+                            value="{{ outstanding }}"
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Max: ₹{{ "%.2f"|format(outstanding) }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Payment Mode *
+                        </label>
+                        <select name="payment_mode" required x-model="paymentMode"
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                            <option value="">Select Mode</option>
+                            <option value="cash">Cash</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="bank_transfer">Bank Transfer/NEFT/RTGS</option>
+                            <option value="upi">UPI</option>
+                            <option value="card">Card</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Status *
+                        </label>
+                        <select name="status" required
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                            <option value="cleared">Cleared</option>
+                            <option value="pending">Pending Clearance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Payment Mode Specific Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div x-show="paymentMode !== 'cash' && paymentMode !== ''">
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Reference Number
+                        </label>
+                        <input type="text" name="reference_number"
+                            :placeholder="paymentMode === 'cheque' ? 'Cheque Number' : paymentMode === 'upi' ? 'Transaction ID' : 'UTR/Reference Number'"
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div x-show="paymentMode === 'cheque' || paymentMode === 'bank_transfer'">
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Bank Name
+                        </label>
+                        <input type="text" name="bank_name"
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div x-show="paymentMode === 'cheque'">
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                            Cheque Date
+                        </label>
+                        <input type="date" name="cheque_date"
+                            class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
+                        Remarks
+                    </label>
+                    <textarea name="remarks" rows="3"
+                        class="shadow-sm border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{{ url_for('orders.view_order', id=order.id) }}"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-gray-600 dark:hover:bg-gray-700">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded shadow-sm transition-all dark:bg-green-600 dark:hover:bg-green-700">
+                        Record Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function paymentForm() {
+        return {
+            paymentMode: ''
+        }
+    }
+</script>
+{% endblock %}

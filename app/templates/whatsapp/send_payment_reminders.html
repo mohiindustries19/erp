@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Send Payment Reminders - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Payment Reminders</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Send reminders to distributors with pending/partial payments</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('whatsapp.dashboard') }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">← Back</a>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-dark-surface rounded-xl shadow-soft dark:shadow-none border border-gray-100 dark:border-dark-border overflow-hidden">
+        <div class="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100 dark:border-dark-border">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Pending Accounts</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">This will send to all distributors listed below.</p>
+            </div>
+            <form method="POST" class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors" onclick="return confirm('Send payment reminders to all pending distributors?');">
+                    Send Reminders
+                </button>
+            </form>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                <thead class="bg-gray-50 dark:bg-dark-bg">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Distributor</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">City</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Outstanding</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Invoices</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
+                    {% for distributor, outstanding, invoice_count in pending_orders %}
+                    <tr class="hover:bg-gray-50 dark:hover:bg-dark-bg/50">
+                        <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-200">
+                            <div class="font-semibold">{{ distributor.business_name }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ distributor.phone }}</div>
+                        </td>
+                        <td class="px-6 py-3 text-sm text-gray-700 dark:text-gray-300">{{ distributor.city }}</td>
+                        <td class="px-6 py-3 text-sm text-right font-bold text-gray-900 dark:text-gray-200">₹{{ "%.2f"|format(outstanding or 0) }}</td>
+                        <td class="px-6 py-3 text-sm text-right text-gray-700 dark:text-gray-300">{{ invoice_count }}</td>
+                    </tr>
+                    {% endfor %}
+
+                    {% if pending_orders|length == 0 %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No pending payments found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
+            Note: WhatsApp sending must be enabled in Settings.
+        </div>
+    </div>
+</div>
+{% endblock %}

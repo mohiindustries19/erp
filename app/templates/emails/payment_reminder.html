@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Reminder</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="margin: 0; font-size: 28px;">{{ company_name }}</h1>
+        <p style="margin: 10px 0 0 0; font-size: 16px;">Payment Reminder</p>
+    </div>
+    
+    <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 16px; margin-top: 0;">Dear {{ order.distributor.contact_person }},</p>
+        
+        <p>This is a friendly reminder that payment for the following order is pending:</p>
+        
+        <div style="background: #fee2e2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+            <h2 style="margin-top: 0; color: #dc2626; font-size: 20px;">Outstanding Payment</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Order Number:</td>
+                    <td style="padding: 8px 0; text-align: right;">{{ order.order_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Order Date:</td>
+                    <td style="padding: 8px 0; text-align: right;">{{ order.order_date.strftime('%d-%m-%Y') }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Days Overdue:</td>
+                    <td style="padding: 8px 0; text-align: right; color: #dc2626; font-weight: bold;">{{ days_overdue }} days</td>
+                </tr>
+                <tr style="border-top: 2px solid #fca5a5;">
+                    <td style="padding: 12px 0; font-weight: bold; font-size: 18px;">Outstanding Amount:</td>
+                    <td style="padding: 12px 0; text-align: right; font-weight: bold; font-size: 18px; color: #dc2626;">₹{{ "%.2f"|format(outstanding) }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #4b5563;">Payment Summary</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0;">Total Amount:</td>
+                    <td style="padding: 8px 0; text-align: right;">₹{{ "%.2f"|format(order.total_amount) }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;">Amount Paid:</td>
+                    <td style="padding: 8px 0; text-align: right; color: #10b981;">₹{{ "%.2f"|format(order.paid_amount) }}</td>
+                </tr>
+                <tr style="border-top: 2px solid #e5e7eb;">
+                    <td style="padding: 12px 0; font-weight: bold;">Balance Due:</td>
+                    <td style="padding: 12px 0; text-align: right; font-weight: bold; color: #dc2626;">₹{{ "%.2f"|format(outstanding) }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="background: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+            <h3 style="margin-top: 0; color: #1e40af;">Payment Methods</h3>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Bank Transfer:</strong></p>
+            <p style="margin: 5px 0 5px 20px; font-size: 14px;">Account Name: {{ company_name }}</p>
+            <p style="margin: 5px 0 5px 20px; font-size: 14px;">Account Number: [Your Account Number]</p>
+            <p style="margin: 5px 0 5px 20px; font-size: 14px;">IFSC Code: [Your IFSC Code]</p>
+            <p style="margin: 15px 0 5px 0; font-size: 14px;"><strong>UPI:</strong> [Your UPI ID]</p>
+            <p style="margin: 15px 0 5px 0; font-size: 14px;"><strong>Cheque:</strong> Payable to "{{ company_name }}"</p>
+        </div>
+        
+        <p style="margin-top: 30px;">Please arrange payment at your earliest convenience. If you have already made the payment, please ignore this reminder and accept our apologies.</p>
+        
+        <p>If you have any questions or need to discuss payment terms, please contact us immediately.</p>
+        
+        <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> {{ company_phone }}</p>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> {{ company_email }}</p>
+        </div>
+        
+        <p style="margin-top: 30px;">Thank you for your prompt attention to this matter.</p>
+        <p style="font-weight: bold;">{{ company_name }} Accounts Team</p>
+    </div>
+    
+    <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
+        <p style="margin: 5px 0;">This is an automated reminder from {{ company_name }}</p>
+        <p style="margin: 5px 0;">Please do not reply to this email</p>
+        <p style="margin: 5px 0;">&copy; {{ company_name }} {{ order.order_date.year }}</p>
+    </div>
+</body>
+</html>

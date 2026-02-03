@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Products - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-3xl font-bold text-text-primary">Products</h2>
+    <div class="flex space-x-2">
+        <a href="{{ url_for('barcode.bulk_generate_page') }}"
+            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg shadow-lg shadow-purple-500/30 transition-all font-medium">
+            📊 Bulk Barcodes
+        </a>
+        <a href="{{ url_for('inventory.export_products_excel') }}"
+            class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg shadow-lg shadow-emerald-500/30 transition-all font-medium">
+            📊 Export Excel
+        </a>
+        <a href="{{ url_for('inventory.add_product') }}"
+            class="bg-brand-primary hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow-lg shadow-red-500/30 transition-all font-medium">
+            + Add Product
+        </a>
+    </div>
+</div>
+
+<div class="glass-card rounded-lg overflow-hidden">
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b border-border-subtle">
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">SKU</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">Product Name</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">Category</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">Pack Size</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">MRP</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">Base Price</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">GST %</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">Shelf Life</th>
+                        <th class="text-left py-3 px-4 font-semibold text-sm uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-subtle">
+                    {% for product in products %}
+                    <tr class="hover:bg-bg-elevated transition-colors">
+                        <td class="py-3 px-4 font-mono text-text-secondary text-sm">{{ product.sku }}</td>
+                        <td class="py-3 px-4 font-semibold text-text-primary">{{ product.name }}</td>
+                        <td class="py-3 px-4 text-text-secondary text-sm">{{ product.category.name }}</td>
+                        <td class="py-3 px-4 text-text-secondary text-sm">{{ product.pack_size }}</td>
+                        <td class="py-3 px-4 text-text-primary">₹{{ "%.2f"|format(product.mrp) }}</td>
+                        <td class="py-3 px-4 text-text-primary">₹{{ "%.2f"|format(product.base_price) }}</td>
+                        <td class="py-3 px-4 text-text-secondary text-sm">{{ product.gst_rate }}%</td>
+                        <td class="py-3 px-4 text-text-secondary text-sm">{{ product.shelf_life_days }} days</td>
+                        <td class="py-3 px-4">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('barcode.view_product_barcode', product_id=product.id) }}"
+                                    class="text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium">📊 Barcode</a>
+                                <a href="{{ url_for('inventory.print_product_label', id=product.id) }}" target="_blank"
+                                    class="text-green-400 hover:text-green-300 transition-colors text-sm font-medium">🖨️ Label</a>
+                                <a href="{{ url_for('inventory.edit_product', id=product.id) }}"
+                                    class="text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium">Edit</a>
+                                <form action="{{ url_for('inventory.delete_product', id=product.id) }}" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to deactivate this product?');"
+                                    style="display: inline;">
+                                    <button type="submit"
+                                        class="text-brand-primary hover:text-red-400 transition-colors text-sm font-medium">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

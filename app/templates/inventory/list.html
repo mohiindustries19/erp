@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div>
+        <h2 class="text-3xl font-display font-bold text-text-primary">Inventory Status</h2>
+        <p class="text-text-secondary mt-1">Real-time stock levels across all warehouses</p>
+    </div>
+    <div class="flex space-x-2">
+        <a href="{{ url_for('inventory.export_inventory_excel') }}"
+            class="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-lg shadow-emerald-500/30 transition ease-in-out duration-150">
+            📊 Export Excel
+        </a>
+        <a href="{{ url_for('inventory.add_inventory') }}"
+            class="inline-flex items-center px-4 py-2 bg-brand-primary hover:bg-red-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-lg shadow-red-500/30 transition ease-in-out duration-150">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add Stock Entry
+        </a>
+    </div>
+</div>
+
+{% if inventory %}
+<!-- Mobile Card View -->
+<div class="grid grid-cols-1 gap-4 sm:hidden">
+    {% for inv in inventory %}
+    <div class="glass-card rounded-xl p-5">
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <h3 class="text-lg font-bold text-text-primary">{{ inv.product.name }}</h3>
+                <span
+                    class="text-xs font-mono text-text-tertiary bg-bg-subtle px-2 py-0.5 rounded border border-border-subtle">{{
+                    inv.product.sku
+                    }}</span>
+            </div>
+            {% if inv.available_quantity == 0 %}
+            <span class="px-2 py-1 text-xs font-bold rounded bg-brand-primary text-white">OUT OF STOCK</span>
+            {% elif inv.available_quantity < inv.product.min_stock_level %} <span
+                class="px-2 py-1 text-xs font-bold rounded border border-brand-primary text-brand-primary">LOW
+                STOCK</span>
+                {% else %}
+                <span
+                    class="px-2 py-1 text-xs font-bold rounded bg-bg-subtle border border-border-subtle text-text-secondary">IN
+                    STOCK</span>
+                {% endif %}
+        </div>
+
+        <div class="text-sm text-text-secondary space-y-2">
+            <div class="flex justify-between border-b border-border-subtle pb-2">
+                <span>Warehouse:</span>
+                <span class="font-medium text-text-primary">{{ inv.warehouse.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Available:</span>
+                <span class="font-bold text-text-primary text-lg">{{ inv.available_quantity }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-text-tertiary">
+                <span>Total: {{ inv.quantity }}</span>
+                <span>Reserved: {{ inv.reserved_quantity }}</span>
+            </div>
+        </div>
+
+        <div class="mt-4 flex space-x-3 pt-3 border-t border-border-subtle">
+            <a href="{{ url_for('inventory.edit_inventory', id=inv.id) }}"
+                class="flex-1 text-center py-2 bg-bg-elevated text-text-primary rounded-lg text-sm font-medium hover:bg-bg-subtle transition-colors">Edit</a>
+            <form method="POST" action="{{ url_for('inventory.delete_inventory', id=inv.id) }}" class="flex-1"
+                onsubmit="return confirm('Delete this inventory entry?');">
+                <button type="submit"
+                    class="w-full py-2 bg-transparent border border-brand-primary text-brand-primary rounded-lg text-sm font-medium hover:bg-brand-primary hover:text-white transition-colors">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Desktop Table View -->
+<div class="glass-card rounded-xl overflow-hidden hidden sm:block">
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-bg-subtle">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Product</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">SKU</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Warehouse</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Available</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Details</th>
+                    <th class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-border-subtle">
+                {% for inv in inventory %}
+                <tr class="hover:bg-bg-elevated transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-bold text-text-primary">{{ inv.product.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-text-secondary">
+                        {{ inv.product.sku }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                        {{ inv.warehouse.name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-bold text-text-primary">{{ inv.available_quantity }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if inv.available_quantity == 0 %}
+                        <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-brand-primary text-white">OUT
+                            OF STOCK</span>
+                        {% elif inv.available_quantity < inv.product.min_stock_level %} <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full border border-brand-primary text-brand-primary">
+                            LOW STOCK</span>
+                            {% else %}
+                            <span
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-bg-elevated border border-border-subtle text-text-secondary">IN
+                                STOCK</span>
+                            {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-xs text-text-tertiary">
+                        Total: {{ inv.quantity }} | Rsrv: {{ inv.reserved_quantity }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end space-x-3">
+                            <a href="{{ url_for('inventory.edit_inventory', id=inv.id) }}"
+                                class="text-text-secondary hover:text-white transition-colors">Edit</a>
+                            <form method="POST" action="{{ url_for('inventory.delete_inventory', id=inv.id) }}"
+                                class="inline" onsubmit="return confirm('Delete this inventory entry?');">
+                                <button type="submit"
+                                    class="text-brand-primary hover:text-red-400 transition-colors">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="rounded-xl bg-bg-subtle border border-brand-primary/20 p-6 flex items-center justify-center">
+    <div class="text-center">
+        <svg class="mx-auto h-12 w-12 text-brand-primary opacity-50" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+            </path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-text-primary">No Inventory Found</h3>
+        <p class="mt-1 text-sm text-text-secondary">Get started by adding stock to your warehouses.</p>
+        <div class="mt-6">
+            <a href="{{ url_for('inventory.add_inventory') }}"
+                class="whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-brand-primary hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Add Stock Entry
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

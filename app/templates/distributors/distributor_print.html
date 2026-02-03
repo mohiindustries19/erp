@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributor Profile - {{ distributor.business_name }} - Mohi Industries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #ffffff;
+            background: #000000;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #d00000;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            color: #d00000;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 16pt;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .header .code {
+            font-size: 14pt;
+            color: #d00000;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-active {
+            background: #00ff00;
+            color: #000000;
+        }
+
+        .status-inactive {
+            background: #ff0000;
+            color: #ffffff;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            background: #d00000;
+            color: #ffffff;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 10px;
+            border: 1px solid #333333;
+        }
+
+        .info-label {
+            color: #d00000;
+            font-weight: bold;
+            font-size: 9pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-size: 11pt;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666666;
+            font-size: 9pt;
+            border-top: 1px solid #333333;
+            padding-top: 10px;
+        }
+
+        @media print {
+            body {
+                background: #000000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MOHI INDUSTRIES</h1>
+        <h2>Distributor Profile</h2>
+        <div class="code">{{ distributor.code }}</div>
+        <div class="status-badge status-{{ distributor.status }}">
+            {{ distributor.status|upper }}
+        </div>
+    </div>
+
+    <!-- Business Information -->
+    <div class="section">
+        <div class="section-title">BUSINESS INFORMATION</div>
+        <div class="info-grid">
+            <div class="info-item full-width">
+                <div class="info-label">Business Name</div>
+                <div class="info-value">{{ distributor.business_name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Contact Person</div>
+                <div class="info-value">{{ distributor.contact_person or '-' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Territory</div>
+                <div class="info-value">{{ distributor.territory or '-' }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="section">
+        <div class="section-title">CONTACT INFORMATION</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Phone</div>
+                <div class="info-value">{{ distributor.phone }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ distributor.email or '-' }}</div>
+            </div>
+            <div class="info-item full-width">
+                <div class="info-label">Address</div>
+                <div class="info-value">
+                    {{ distributor.address_line1 }}<br>
+                    {% if distributor.address_line2 %}{{ distributor.address_line2 }}<br>{% endif %}
+                    {{ distributor.city }}, {{ distributor.state }} - {{ distributor.pincode }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tax Information -->
+    <div class="section">
+        <div class="section-title">TAX INFORMATION</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">GSTIN</div>
+                <div class="info-value">{{ distributor.gstin or '-' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">PAN</div>
+                <div class="info-value">{{ distributor.pan or '-' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">State Code</div>
+                <div class="info-value">{{ distributor.state_code or '-' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">State</div>
+                <div class="info-value">{{ distributor.state }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Terms -->
+    <div class="section">
+        <div class="section-title">BUSINESS TERMS</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Margin Percentage</div>
+                <div class="info-value">{{ distributor.margin_percentage }}%</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Credit Limit</div>
+                <div class="info-value">₹{{ "%.2f"|format(distributor.credit_limit) }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Credit Days</div>
+                <div class="info-value">{{ distributor.credit_days }} days</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Payment Terms</div>
+                <div class="info-value">{{ distributor.payment_terms|upper }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Onboarding Date</div>
+                <div class="info-value">{{ distributor.onboarding_date.strftime('%d-%m-%Y') if distributor.onboarding_date else '-' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">{{ distributor.status|upper }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now().strftime('%d-%m-%Y %H:%M') }} | Mohi Industries ERP
+    </div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+SKU,Product Name,Category,Pack Size,Unit,HSN Code,GST Rate,Shelf Life Days
+BRD-WHT-175,Bread White 175g,Bread,175g,pcs,1905,5%,7
+BRD-WHT-200,Bread White 200g,Bread,200g,pcs,1905,5%,7
+BRD-WHT-350,Bread White 350g,Bread,350g,pcs,1905,5%,7
+BRD-WHT-400,Bread White 400g,Bread,400g,pcs,1905,5%,7
+BRD-WHT-600,Bread White 600g,Bread,600g,pcs,1905,5%,7
+BRD-WHT-800,Bread White 800g,Bread,800g,pcs,1905,5%,7
+BRD-ATA-450,Bread Atta 450g,Bread,450g,pcs,1905,5%,7
+BRD-FRT-200,Bread Fruits 200g,Bread,200g,pcs,1905,5%,7
+BRD-MKN-400,Bread Makhan 400g,Bread,400g,pcs,1905,5%,7
+BRD-MLK-400,Bread Milk 400g,Bread,400g,pcs,1905,5%,7
+CKI-STD-001,Cookies,Cookies & Biscuits,pack,pcs,1905,5%,30
+BAK-PAW-001,Paw,Bakery,pcs,pcs,1905,5%,3
+BAK-BUN-001,Bun,Bakery,pcs,pcs,1905,5%,3
+BAK-PAP-001,Papa,Bakery,pcs,pcs,1905,5%,3
+BAK-CRL-001,Cream Roll,Bakery,pcs,pcs,1905,5%,3
+CAK-STD-001,Cake,Cakes,pcs,pcs,1905,5%,5
+RSK-STD-001,Rusk,Rusk,pack,pcs,1905,5%,60
+SNK-NMP-001,Namak Pare,Snacks,pack,pcs,1905,5%,30
+BAK-CBN-001,Cream Bun,Bakery,pcs,pcs,1905,5%,3
+SNK-RNM-001,Rosted Nimki,Snacks,pack,pcs,1905,5%,30
+BAK-PZB-001,Pizza Base,Bakery,pcs,pcs,1905,5%,7
+CAK-CUP-001,Cup Cake,Cakes,pcs,pcs,1905,5%,5
+BAK-RBN-001,Ring Bun,Bakery,pcs,pcs,1905,5%,3
+BAK-RRL-001,Rosted Roll,Bakery,pcs,pcs,1905,5%,3

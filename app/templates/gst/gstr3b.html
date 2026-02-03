@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}GSTR-3B - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-3xl font-display font-bold text-gray-900">File GSTR-3B</h2>
+    <p class="text-gray-500 mt-1">Enter period (MMYYYY) and summary JSON</p>
+</div>
+
+<form method="POST" class="bg-white rounded-xl shadow-soft p-6 border border-gray-100">
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Period (MMYYYY)</label>
+        <input type="text" name="period" class="w-full rounded-lg border-gray-300 shadow-sm" placeholder="012026">
+    </div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Summary JSON</label>
+    <textarea name="summary_json" rows="10" class="w-full rounded-lg border-gray-300 shadow-sm" placeholder='{"outward_supplies":0}'></textarea>
+    <button type="submit" class="mt-4 px-6 py-2.5 bg-primary-600 text-white rounded-lg">Submit</button>
+</form>
+
+{% if result %}
+<div class="mt-6 bg-white rounded-xl shadow-soft p-6 border border-gray-100">
+    <pre class="text-sm text-gray-800">{{ result | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+{% endblock %}

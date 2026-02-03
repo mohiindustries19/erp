@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Rebuild Ledger - Mohi ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Rebuild Ledger</h1>
+    <a href="{{ url_for('accounting.dashboard') }}" class="text-sm text-gray-300 hover:text-white">Back to Accounting</a>
+  </div>
+
+  <div class="bg-gray-900/60 border border-gray-800 rounded-lg p-5">
+    <p class="text-sm text-gray-300 mb-4">
+      Regenerates auto-posted <span class="font-mono">AccountingEntry</span> rows from source documents for the selected date range.
+      This does not touch unknown/manual entries. Use <b>Dry run</b> first.
+    </p>
+
+    <form method="post" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">Start date</label>
+          <input type="date" name="start_date" value="{{ start_date }}" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">End date</label>
+          <input type="date" name="end_date" value="{{ end_date }}" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <label class="flex items-center gap-2 text-sm text-gray-200">
+          <input type="checkbox" name="include_orders" {% if include_orders %}checked{% endif %} />
+          Rebuild Orders (Sales)
+        </label>
+        <label class="flex items-center gap-2 text-sm text-gray-200">
+          <input type="checkbox" name="include_payments" {% if include_payments %}checked{% endif %} />
+          Rebuild Customer Payments
+        </label>
+        <label class="flex items-center gap-2 text-sm text-gray-200">
+          <input type="checkbox" name="include_expenses" {% if include_expenses %}checked{% endif %} />
+          Rebuild Expenses
+        </label>
+        <label class="flex items-center gap-2 text-sm text-gray-200">
+          <input type="checkbox" name="include_vendor" {% if include_vendor %}checked{% endif %} />
+          Rebuild Vendor Bills/Payments
+        </label>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-gray-200">
+        <input type="checkbox" name="dry_run" {% if dry_run %}checked{% endif %} />
+        Dry run (no database changes)
+      </label>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Run</button>
+        <span class="text-xs text-gray-400">Admin only</span>
+      </div>
+    </form>
+  </div>
+
+  {% if summary %}
+    <div class="mt-6 bg-gray-900/60 border border-gray-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-3">Result</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="bg-gray-950 border border-gray-800 rounded p-3">
+          <div class="text-gray-400">Entries deleted</div>
+          <div class="text-xl font-semibold">{{ summary.deleted_entries }}</div>
+        </div>
+        <div class="bg-gray-950 border border-gray-800 rounded p-3">
+          <div class="text-gray-400">Entries created</div>
+          <div class="text-xl font-semibold">{{ summary.created_entries }}</div>
+        </div>
+      </div>
+
+      <div class="mt-4 overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-300">
+              <th class="py-2 pr-4">Type</th>
+              <th class="py-2 pr-4">Processed</th>
+              <th class="py-2 pr-4">Skipped</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-200">
+            <tr class="border-t border-gray-800">
+              <td class="py-2 pr-4">Orders</td>
+              <td class="py-2 pr-4">{{ summary.orders_processed }}</td>
+              <td class="py-2 pr-4">{{ summary.orders_skipped }}</td>
+            </tr>
+            <tr class="border-t border-gray-800">
+              <td class="py-2 pr-4">Payments</td>
+              <td class="py-2 pr-4">{{ summary.payments_processed }}</td>
+              <td class="py-2 pr-4">{{ summary.payments_skipped }}</td>
+            </tr>
+            <tr class="border-t border-gray-800">
+              <td class="py-2 pr-4">Expenses</td>
+              <td class="py-2 pr-4">{{ summary.expenses_processed }}</td>
+              <td class="py-2 pr-4">{{ summary.expenses_skipped }}</td>
+            </tr>
+            <tr class="border-t border-gray-800">
+              <td class="py-2 pr-4">Vendor Bills</td>
+              <td class="py-2 pr-4">{{ summary.vendor_bills_processed }}</td>
+              <td class="py-2 pr-4">{{ summary.vendor_bills_skipped }}</td>
+            </tr>
+            <tr class="border-t border-gray-800">
+              <td class="py-2 pr-4">Vendor Payments</td>
+              <td class="py-2 pr-4">{{ summary.vendor_payments_processed }}</td>
+              <td class="py-2 pr-4">{{ summary.vendor_payments_skipped }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {% if dry_run %}
+        <p class="mt-3 text-xs text-gray-400">This was a dry run; nothing was saved.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

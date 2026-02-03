@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Ledger - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Account Ledger</h1>
+        <a href="{{ url_for('accounting.dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+            ← Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Select Account to View Ledger</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for account in accounts %}
+            <a href="{{ url_for('accounting.account_ledger', account_id=account.id) }}" 
+               class="bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg p-4 transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-mono text-sm text-gray-600">{{ account.account_number or account.account_code }}</p>
+                        <p class="font-semibold text-gray-800">{{ account.name or account.account_name }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ account.description or account.account_group }}</p>
+                    </div>
+                    <span class="text-sm font-semibold text-blue-600">₹{{ "%.2f"|format(account.current_balance) }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

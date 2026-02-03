@@ -1,0 +1,443 @@
+/* =====================================================
+   Mohi ERP - Simple Dark Theme
+   ===================================================== */
+
+:root {
+    /* Light mode defaults */
+    --bg-app: #f6f7fb;
+    --bg-card: #ffffff;
+    --bg-subtle: #f1f5f9;
+    --bg-elevated: #e8edf4;
+
+    --border-subtle: rgba(15, 23, 42, 0.12);
+    --border-default: rgba(15, 23, 42, 0.20);
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-tertiary: #64748b;
+
+    /* Accent derives from active theme (set in base.html) */
+    --accent: var(--theme-primary, #4f8cff);
+    --accent-strong: var(--theme-primary-light, #6aa0ff);
+    --success: #4ec9b0;
+    --danger: #c586c0;
+}
+
+html.dark {
+    /* Dark mode overrides */
+    --bg-app: #1e1e1e;
+    --bg-card: #252526;
+    --bg-subtle: #1f2329;
+    --bg-elevated: #2a2d2e;
+
+    --border-subtle: rgba(133, 133, 133, 0.35);
+    --border-default: rgba(133, 133, 133, 0.55);
+
+    --text-primary: #d4d4d4;
+    --text-secondary: #9da1a6;
+    --text-tertiary: #7a7f85;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    background: var(--bg-app);
+    color: var(--text-primary);
+    font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Utility tokens */
+.bg-bg-app { background-color: var(--bg-app); }
+.bg-bg-card { background-color: var(--bg-card); }
+.bg-bg-subtle { background-color: var(--bg-subtle); }
+.bg-bg-elevated { background-color: var(--bg-elevated); }
+
+.text-text-primary { color: var(--text-primary); }
+.text-text-secondary { color: var(--text-secondary); }
+.text-text-tertiary { color: var(--text-tertiary); }
+
+.border-border-subtle { border-color: var(--border-subtle); }
+.border-border-default { border-color: var(--border-default); }
+
+/* Sidebar */
+.nav-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-link.active {
+    color: #ffffff;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Buttons */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.75rem;
+    transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+/* Alerts */
+.alert {
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-default);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.alert-success {
+    border-color: rgba(78, 201, 176, 0.45);
+}
+
+.alert-error {
+    border-color: rgba(197, 134, 192, 0.55);
+}
+
+/* Forms */
+input,
+textarea,
+select {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    border-radius: 0.5rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.2);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+thead th {
+    color: var(--text-tertiary);
+}
+
+tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Links */
+a {
+    color: var(--text-secondary);
+}
+
+a:hover {
+    color: var(--accent-strong);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(157, 161, 166, 0.35);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(157, 161, 166, 0.55);
+}
+
+/* Print */
+@media print {
+    html,
+    body {
+        background: #fff;
+        color: #111827;
+    }
+}
+
+/* =====================================================
+   Tailwind compatibility (forced dark)
+   Many templates still use light utilities like bg-white/text-gray-900
+   without a `dark:` variant. Since the app runs in dark mode, map those
+   common utilities to our tokens for consistent styling.
+   ===================================================== */
+
+html.dark .bg-white { background-color: var(--bg-card); }
+html.dark .bg-gray-50 { background-color: var(--bg-subtle); }
+html.dark .bg-gray-100 { background-color: var(--bg-elevated); }
+
+/* Slate palette (Tailwind) */
+html.dark .bg-slate-50 { background-color: var(--bg-subtle); }
+html.dark .bg-slate-100 { background-color: var(--bg-elevated); }
+html.dark .bg-slate-200 { background-color: var(--bg-elevated); }
+
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+    border-color: var(--border-subtle);
+}
+
+html.dark .border-gray-700,
+html.dark .border-gray-800,
+html.dark .border-gray-900 {
+    border-color: var(--border-default);
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300 {
+    border-color: var(--border-subtle);
+}
+
+html.dark .border-slate-400,
+html.dark .border-slate-500 {
+    border-color: var(--border-default);
+}
+
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700 {
+    color: var(--text-primary);
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700 {
+    color: var(--text-primary);
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+    color: var(--text-secondary);
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+    color: var(--text-secondary);
+}
+
+html.dark .text-gray-400 {
+    color: var(--text-tertiary);
+}
+
+html.dark .text-slate-400 {
+    color: var(--text-tertiary);
+}
+
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-300 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-subtle);
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-300 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-subtle);
+}
+
+html.dark .shadow,
+html.dark .shadow-soft {
+    box-shadow: none;
+}
+
+/* Status/info utility colors (keep low specificity so Tailwind `dark:*` can override) */
+html.dark :where(.shadow-md) { box-shadow: none; }
+
+/* Blues (info) */
+html.dark :where(.bg-blue-50) { background-color: rgba(79, 140, 255, 0.10); }
+html.dark :where(.bg-blue-100) { background-color: rgba(79, 140, 255, 0.14); }
+html.dark :where(.border-blue-500) { border-color: rgba(79, 140, 255, 0.55); }
+html.dark :where(.text-blue-800, .text-blue-700, .text-blue-600) { color: var(--accent-strong); }
+
+/* Greens (success) */
+html.dark :where(.bg-green-50) { background-color: rgba(78, 201, 176, 0.10); }
+html.dark :where(.bg-green-100) { background-color: rgba(78, 201, 176, 0.14); }
+html.dark :where(.border-green-500) { border-color: rgba(78, 201, 176, 0.55); }
+html.dark :where(.text-green-800, .text-green-700, .text-green-600) { color: #9ff0e2; }
+
+/* Emeralds (success alt - used by some Tailwind templates) */
+html.dark :where(.bg-emerald-50) { background-color: rgba(78, 201, 176, 0.10); }
+html.dark :where(.bg-emerald-100) { background-color: rgba(78, 201, 176, 0.14); }
+html.dark :where(.border-emerald-500) { border-color: rgba(78, 201, 176, 0.55); }
+html.dark :where(.text-emerald-800, .text-emerald-700, .text-emerald-600) { color: #9ff0e2; }
+
+/* Reds (danger) */
+html.dark :where(.bg-red-50) { background-color: rgba(197, 134, 192, 0.10); }
+html.dark :where(.bg-red-100) { background-color: rgba(197, 134, 192, 0.14); }
+html.dark :where(.border-red-500) { border-color: rgba(197, 134, 192, 0.55); }
+html.dark :where(.text-red-800, .text-red-700, .text-red-600) { color: var(--danger); }
+
+/* Roses (danger alt - used by some Tailwind templates) */
+html.dark :where(.bg-rose-50) { background-color: rgba(197, 134, 192, 0.10); }
+html.dark :where(.bg-rose-100) { background-color: rgba(197, 134, 192, 0.14); }
+html.dark :where(.border-rose-500) { border-color: rgba(197, 134, 192, 0.55); }
+html.dark :where(.text-rose-800, .text-rose-700, .text-rose-600) { color: var(--danger); }
+
+/* Purples (equity / secondary emphasis) */
+html.dark :where(.bg-purple-50) { background-color: rgba(197, 134, 192, 0.08); }
+html.dark :where(.bg-purple-100) { background-color: rgba(197, 134, 192, 0.12); }
+html.dark :where(.text-purple-800, .text-purple-700, .text-purple-600) { color: var(--danger); }
+
+/* Neutral light grays used as buttons/cards in old templates */
+html.dark :where(.bg-gray-300, .bg-gray-400) { background-color: rgba(255, 255, 255, 0.06); }
+html.dark :where(.hover\:bg-gray-400:hover) { background-color: rgba(255, 255, 255, 0.10); }
+
+/* =====================================================
+   UI polish (buttons, forms, tables)
+   ===================================================== */
+
+/* Links */
+html.dark .text-primary-600,
+html.dark .text-primary-500 {
+    color: var(--accent-strong);
+}
+
+html.dark .dark\:text-primary-400 {
+    color: var(--accent);
+}
+
+/* Primary buttons (Tailwind) */
+html.dark .bg-primary-600 {
+    background-color: var(--accent);
+}
+
+html.dark .hover\:bg-primary-700:hover {
+    background-color: #3b76f6;
+}
+
+html.dark .bg-primary-600,
+html.dark .hover\:bg-primary-700:hover {
+    color: #ffffff;
+}
+
+/* Map legacy blue/green buttons to theme tokens */
+html.dark .bg-blue-500 {
+    background-color: var(--accent);
+}
+
+html.dark .hover\:bg-blue-600:hover {
+    background-color: #3b76f6;
+}
+
+html.dark .bg-green-500,
+html.dark .bg-green-600 {
+    background-color: rgba(78, 201, 176, 0.35);
+    border: 1px solid rgba(78, 201, 176, 0.45);
+    color: #eafffb;
+}
+
+html.dark .hover\:bg-green-600:hover,
+html.dark .hover\:bg-green-700:hover {
+    background-color: rgba(78, 201, 176, 0.45);
+}
+
+/* Neutral buttons */
+html.dark .bg-gray-500 {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+}
+
+html.dark .hover\:bg-gray-600:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Destructive links (avoid bright red) */
+html.dark .text-red-600,
+html.dark .text-red-700,
+html.dark .text-red-800 {
+    color: var(--danger);
+}
+
+/* Form control polish */
+input,
+textarea,
+select {
+    padding: 0.5rem 0.75rem;
+}
+
+html.dark input.border,
+html.dark textarea.border,
+html.dark select.border {
+    border-color: var(--border-default);
+}
+
+html.dark .shadow-sm,
+html.dark .shadow {
+    box-shadow: none;
+}
+
+/* Legacy focus utility: focus:shadow-outline */
+html.dark .focus\:shadow-outline:focus {
+    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.25);
+    border-color: var(--accent);
+}
+
+/* Checkbox/radio */
+html.dark input[type="checkbox"],
+html.dark input[type="radio"] {
+    accent-color: var(--accent);
+}
+
+/* Select dropdown readability (best-effort; OS may override) */
+html.dark select option {
+    background: #1f2329;
+    color: #d4d4d4;
+}
+
+/* Table polish */
+html.dark thead {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+html.dark tbody {
+    background: transparent;
+}
+
+html.dark .hover\:bg-gray-50:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+}

@@ -1,0 +1,177 @@
+===========================================
+RAILWAY DEPLOYMENT - EXACT COMMANDS
+===========================================
+
+Copy and paste these commands in order:
+
+-------------------------------------------
+STEP 1: NAVIGATE TO PROJECT
+-------------------------------------------
+
+cd d:\OtherRepos\mohierp\mohi-erp
+
+-------------------------------------------
+STEP 2: INITIALIZE GIT (if not done)
+-------------------------------------------
+
+git init
+git add .
+git commit -m "Ready for Railway deployment"
+
+-------------------------------------------
+STEP 3: CREATE GITHUB REPO
+-------------------------------------------
+
+1. Go to: https://github.com/new
+2. Repository name: mohi-erp
+3. Private repository (recommended)
+4. Don't initialize with README
+5. Click "Create repository"
+
+-------------------------------------------
+STEP 4: PUSH TO GITHUB
+-------------------------------------------
+
+Replace YOUR_USERNAME with your GitHub username:
+
+git remote add origin https://github.com/YOUR_USERNAME/mohi-erp.git
+git branch -M main
+git push -u origin main
+
+-------------------------------------------
+STEP 5: DEPLOY ON RAILWAY
+-------------------------------------------
+
+1. Go to: https://railway.app
+2. Click "New Project"
+3. Select "Deploy from GitHub repo"
+4. Choose "mohi-erp" repository
+5. Wait for build to complete
+
+-------------------------------------------
+STEP 6: ADD POSTGRESQL
+-------------------------------------------
+
+1. In your Railway project
+2. Click "New"
+3. Select "Database"
+4. Choose "Add PostgreSQL"
+5. Done! (DATABASE_URL is auto-set)
+
+-------------------------------------------
+STEP 7: SET ENVIRONMENT VARIABLES
+-------------------------------------------
+
+Click on your app service → "Variables" tab → Add these:
+
+SECRET_KEY=change-this-to-random-secret-key-xyz123
+FLASK_ENV=production
+AUTO_CREATE_DB=true
+COMPANY_NAME=Mohi Industries
+COMPANY_GSTIN=10GANPS5418H1ZJ
+COMPANY_PHONE=+91 9262650010
+COMPANY_EMAIL=info@mohiindustries.in
+FSSAI_LICENSE=10423110000282
+BARCODE_COMPANY_PREFIX=890123456
+
+-------------------------------------------
+STEP 8: WAIT FOR DEPLOYMENT
+-------------------------------------------
+
+Railway will automatically:
+- Install dependencies
+- Build the app
+- Start gunicorn
+- Provide a public URL
+
+Check "Deployments" tab for progress.
+
+-------------------------------------------
+STEP 9: INITIALIZE DATABASE (OPTIONAL)
+-------------------------------------------
+
+If AUTO_CREATE_DB=true is set, tables are created automatically.
+
+Otherwise, install Railway CLI and run:
+
+npm i -g @railway/cli
+railway login
+railway link
+railway run python init_railway_db.py
+
+-------------------------------------------
+STEP 10: ACCESS YOUR ERP
+-------------------------------------------
+
+Your app will be live at:
+https://your-app-name.up.railway.app
+
+Login:
+Username: admin
+Password: admin123
+
+⚠️ CHANGE PASSWORD IMMEDIATELY!
+
+-------------------------------------------
+GENERATE SECRET KEY
+-------------------------------------------
+
+To generate a secure SECRET_KEY, run:
+
+python -c "import secrets; print(secrets.token_hex(32))"
+
+Copy the output and use it as SECRET_KEY in Railway.
+
+-------------------------------------------
+TROUBLESHOOTING
+-------------------------------------------
+
+Build Failed?
+- Check Railway logs
+- Verify requirements.txt
+- Ensure Python 3.11
+
+Can't Connect to Database?
+- Wait 1-2 minutes after adding PostgreSQL
+- Check DATABASE_URL is set automatically
+- Verify PostgreSQL service is running
+
+App Shows Error?
+- Check deployment logs
+- Verify environment variables
+- Run init_railway_db.py
+
+-------------------------------------------
+MONITORING
+-------------------------------------------
+
+View Logs:
+Railway Dashboard → Service → Deployments → Latest
+
+Check Usage:
+Railway Dashboard → Usage tab
+
+Your Trial:
+26 days or $5.00 remaining
+
+-------------------------------------------
+SUPPORT
+-------------------------------------------
+
+Railway Docs: https://docs.railway.app
+Railway Discord: https://discord.gg/railway
+
+-------------------------------------------
+DONE! 🎉
+-------------------------------------------
+
+Your Mohi Industries ERP is now live on Railway!
+
+Next steps:
+1. Login and change admin password
+2. Add products and distributors
+3. Test all features
+4. Train your team
+5. Start using for business!
+
+===========================================

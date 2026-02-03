@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Expense Categories - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Expense Categories</h1>
+        <a href="{{ url_for('accounting.list_expenses') }}"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+            ← Back to Expenses
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Add New Category</h2>
+        <form method="POST" action="{{ url_for('accounting.add_expense_category') }}" class="flex gap-3">
+            <input type="text" name="name" placeholder="e.g., Rent, Salary, Utilities" required
+                class="flex-1 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition">
+                Add
+            </button>
+        </form>
+        <p class="text-sm text-gray-500 mt-3">
+            Tip: Keep names consistent (Title Case) for clean reports.
+        </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Used In Expenses</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Status</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for cat in categories %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ cat.name }}</td>
+                        <td class="px-4 py-3 text-sm text-right">{{ usage.get(cat.name, 0) }}</td>
+                        <td class="px-4 py-3 text-center">
+                            {% if cat.is_active %}
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Active</span>
+                            {% else %}
+                            <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <form method="POST" action="{{ url_for('accounting.toggle_expense_category', id=cat.id) }}" class="inline">
+                                <button type="submit"
+                                    class="text-sm px-3 py-1 rounded border transition
+                                    {% if cat.is_active %}
+                                        border-gray-300 text-gray-800 hover:bg-gray-100
+                                    {% else %}
+                                        border-green-300 text-green-800 hover:bg-green-50
+                                    {% endif %}
+                                    ">
+                                    {% if cat.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-sm text-gray-600 mt-6">
+        Notes:
+        <ul class="list-disc pl-6 mt-2 space-y-1">
+            <li>Inactive categories won’t appear in the Expense entry dropdown.</li>
+            <li>Existing expenses keep their stored category (shown as “Legacy” if inactive).</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

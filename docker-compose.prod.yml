@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mohi_db_prod
+    environment:
+      POSTGRES_DB: mohi_erp
+      POSTGRES_USER: ${DB_USER:-mohi_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_this_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    restart: always
+    networks:
+      - mohi_network
+
+  web:
+    build: .
+    container_name: mohi_web_prod
+    command: gunicorn -w 4 -b 0.0.0.0:5000 run:app
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-mohi_admin}:${DB_PASSWORD:-change_this_password}@db:5432/mohi_erp
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - mohi_network
+
+volumes:
+  postgres_data:
+
+networks:
+  mohi_network:
+    driver: bridge
