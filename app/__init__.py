@@ -69,6 +69,31 @@ def create_app(config_class=Config):
     app.register_blueprint(settings.bp)
     app.register_blueprint(barcode.bp)
     
+    # Initialize database tables if AUTO_CREATE_DB is enabled
+    import os
+    auto_create_db = os.getenv('AUTO_CREATE_DB', 'false').lower() in ['true', '1', 'on', 'yes']
+    if auto_create_db:
+        with app.app_context():
+            db.create_all()
+            print("✅ Database tables created (AUTO_CREATE_DB enabled)")
+            
+            # Create default admin user if not exists
+            from app.models import User
+            from werkzeug.security import generate_password_hash
+            
+            admin = User.query.filter_by(username='admin').first()
+            if not admin:
+                admin = User(
+                    username='admin',
+                    email='admin@mohiindustries.in',
+                    password_hash=generate_password_hash('admin123'),
+                    role='admin',
+                    is_active=True
+                )
+                db.session.add(admin)
+                db.session.commit()
+                print("✅ Default admin user created (username: admin, password: admin123)")
+    
     return app
 
 from app import models
