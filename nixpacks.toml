@@ -8,7 +8,7 @@ cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
 cmds = ["python -c 'print(\"Build complete\")'"]
 
 [start]
-cmd = "gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+cmd = "sh -c 'gunicorn run:app --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120'"
 
 [variables]
 PORT = "8080"
