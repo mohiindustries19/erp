@@ -12,9 +12,49 @@ class Config:
     
     # Database
     # Fix Railway DATABASE_URL (postgres:// -> postgresql://)
-    database_url = os.environ.get('DATABASE_URL')
+    database_url = (
+        os.environ.get('DATABASE_URL')
+        or os.environ.get('POSTGRES_URL')
+        or os.environ.get('POSTGRESQL_URL')
+    )
     if database_url and database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+    if not database_url:
+        # Build from Railway/PG* environment variables when DATABASE_URL is missing
+        host = (
+            os.environ.get('PGHOST')
+            or os.environ.get('POSTGRES_HOST')
+            or os.environ.get('POSTGRESQL_HOST')
+        )
+        port = (
+            os.environ.get('PGPORT')
+            or os.environ.get('POSTGRES_PORT')
+            or os.environ.get('POSTGRESQL_PORT')
+            or '5432'
+        )
+        user = (
+            os.environ.get('PGUSER')
+            or os.environ.get('POSTGRES_USER')
+            or os.environ.get('POSTGRESQL_USER')
+        )
+        password = (
+            os.environ.get('PGPASSWORD')
+            or os.environ.get('POSTGRES_PASSWORD')
+            or os.environ.get('POSTGRESQL_PASSWORD')
+        )
+        db_name = (
+            os.environ.get('PGDATABASE')
+            or os.environ.get('POSTGRES_DB')
+            or os.environ.get('POSTGRESQL_DB')
+        )
+
+        if host and user and db_name:
+            if password:
+                database_url = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
+            else:
+                database_url = f"postgresql://{user}@{host}:{port}/{db_name}"
+
     SQLALCHEMY_DATABASE_URI = database_url or \
         'postgresql://mohi_admin:mohi_secure_2024@localhost:5435/mohi_erp'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
