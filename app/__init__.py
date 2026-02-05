@@ -48,7 +48,7 @@ def create_app(config_class=Config):
     limiter.init_app(app)
     
     # Register blueprints
-    from app.routes import auth, main, distributor, inventory, orders, payment, users, accounting, analytics, ai_chat, email_notifications, advanced_analytics, purchasing, gst, qc, whatsapp, documents, settings, barcode
+    from app.routes import auth, main, distributor, inventory, orders, payment, users, accounting, analytics, ai_chat, email_notifications, advanced_analytics, purchasing, gst, qc, whatsapp, documents, settings, barcode, goods
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(distributor.bp)
@@ -68,6 +68,7 @@ def create_app(config_class=Config):
     app.register_blueprint(documents.bp)
     app.register_blueprint(settings.bp)
     app.register_blueprint(barcode.bp)
+    app.register_blueprint(goods.bp)
     
     # Initialize database tables if AUTO_CREATE_DB is enabled
     import os

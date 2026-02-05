@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Edit Goods - Mohi Industries ERP{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold text-white">Edit Goods Item #{{ goods.item_number }}</h2>
+        <a href="{{ url_for('goods.list_goods') }}" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg transition">← Back</a>
+    </div>
+    <form method="POST" class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Item Number *</label><input type="number" name="item_number" value="{{ goods.item_number }}" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Name *</label><input type="text" name="name" value="{{ goods.name }}" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Category</label><input type="text" name="category" value="{{ goods.category or '' }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Quantity</label><input type="number" name="quantity" value="{{ goods.quantity }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Unit</label><input type="text" name="unit" value="{{ goods.unit }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Location</label><input type="text" name="location" value="{{ goods.location or '' }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Condition</label><select name="condition" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"><option value="good" {% if goods.condition=='good' %}selected{% endif %}>Good</option><option value="fair" {% if goods.condition=='fair' %}selected{% endif %}>Fair</option><option value="poor" {% if goods.condition=='poor' %}selected{% endif %}>Poor</option><option value="damaged" {% if goods.condition=='damaged' %}selected{% endif %}>Damaged</option></select></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Purchase Date</label><input type="date" name="purchase_date" value="{{ goods.purchase_date.strftime('%Y-%m-%d') if goods.purchase_date else '' }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Purchase Price</label><input type="number" step="0.01" name="purchase_price" value="{{ goods.purchase_price or '' }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div><label class="block text-sm font-semibold text-gray-300 mb-2">Supplier</label><input type="text" name="supplier" value="{{ goods.supplier or '' }}" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"></div>
+            <div class="md:col-span-2"><label class="block text-sm font-semibold text-gray-300 mb-2">Notes</label><textarea name="notes" rows="3" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white">{{ goods.notes or '' }}</textarea></div>
+            <div><label class="flex items-center"><input type="checkbox" name="is_active" {% if goods.is_active %}checked{% endif %} class="mr-2"><span class="text-gray-300">Active</span></label></div>
+        </div>
+        <div class="mt-6 flex space-x-3">
+            <button type="submit" class="bg-theme-primary hover:bg-theme-primary-hover text-white px-6 py-2.5 rounded-lg transition font-semibold">💾 Save Changes</button>
+            <a href="{{ url_for('goods.list_goods') }}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2.5 rounded-lg transition">Cancel</a>
+        </div>
+    </form>
+</div>
+<style>.bg-theme-primary{background-color:var(--theme-primary)!important}.hover\:bg-theme-primary-hover:hover{background-color:var(--theme-primary-hover)!important}</style>
+{% endblock %}

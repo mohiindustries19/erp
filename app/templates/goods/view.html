@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}View Goods - Mohi Industries ERP{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold text-white">Goods Item #{{ goods.item_number }}</h2>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('goods.edit_goods', id=goods.id) }}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-lg transition">✏️ Edit</a>
+            <a href="{{ url_for('goods.list_goods') }}" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg transition">← Back</a>
+        </div>
+    </div>
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><p class="text-gray-400 text-sm mb-1">Item Number</p><p class="text-white font-mono text-lg">#{{ goods.item_number }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Name</p><p class="text-white text-lg font-semibold">{{ goods.name }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Category</p><p class="text-white">{{ goods.category or '-' }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Quantity</p><p class="text-white">{{ goods.quantity }} {{ goods.unit }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Location</p><p class="text-white">{{ goods.location or '-' }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Condition</p><p class="text-white">{{ goods.condition|capitalize }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Purchase Date</p><p class="text-white">{{ goods.purchase_date.strftime('%d-%m-%Y') if goods.purchase_date else '-' }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Purchase Price</p><p class="text-white">₹{{ "%.2f"|format(goods.purchase_price) if goods.purchase_price else '-' }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Supplier</p><p class="text-white">{{ goods.supplier or '-' }}</p></div>
+            <div><p class="text-gray-400 text-sm mb-1">Status</p><p class="text-white">{{ 'Active' if goods.is_active else 'Inactive' }}</p></div>
+            <div class="md:col-span-2"><p class="text-gray-400 text-sm mb-1">Notes</p><p class="text-white">{{ goods.notes or '-' }}</p></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

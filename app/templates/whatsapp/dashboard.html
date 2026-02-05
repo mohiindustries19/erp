@@ -13,7 +13,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">WhatsApp Status</h3>
-            {% if enabled %}
+            {% if configured %}
             <p class="text-green-600 dark:text-green-400 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -27,6 +27,11 @@
                 </svg>
                 Not Connected - Configure in settings
             </p>
+            {% if enabled and missing_keys %}
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Missing: <span class="font-mono">{{ missing_keys|join(', ') }}</span>
+            </p>
+            {% endif %}
             {% endif %}
         </div>
         <a href="{{ url_for('whatsapp.settings') }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
@@ -140,7 +145,7 @@
 </div>
 
 <!-- Test Message -->
-{% if not enabled %}
+{% if not configured %}
 <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 mb-6">
     <div class="flex items-start">
         <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -149,7 +154,12 @@
         <div>
             <h3 class="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-2">WhatsApp Not Configured</h3>
             <p class="text-yellow-700 dark:text-yellow-400 mb-4">
-                WhatsApp integration is not enabled. Configure your WhatsApp provider in settings to start sending messages.
+                {% if not enabled %}
+                    WhatsApp integration is disabled. Enable it and set provider keys to start sending messages.
+                {% else %}
+                    WhatsApp is enabled but missing required provider keys.
+                    {% if missing_keys %}<span class="font-mono">({{ missing_keys|join(', ') }})</span>{% endif %}
+                {% endif %}
             </p>
             <a href="{{ url_for('whatsapp.settings') }}" class="inline-block px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
                 Configure Now

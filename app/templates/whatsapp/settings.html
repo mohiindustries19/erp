@@ -18,8 +18,10 @@
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h2 class="text-lg font-bold text-gray-800 dark:text-white">Status</h2>
-                {% if enabled %}
-                <p class="mt-2 text-green-600 dark:text-green-400 font-semibold">Enabled</p>
+                {% if configured %}
+                <p class="mt-2 text-green-600 dark:text-green-400 font-semibold">Connected</p>
+                {% elif enabled %}
+                <p class="mt-2 text-yellow-700 dark:text-yellow-400 font-semibold">Enabled (missing keys)</p>
                 {% else %}
                 <p class="mt-2 text-red-600 dark:text-red-400 font-semibold">Disabled</p>
                 {% endif %}
@@ -34,12 +36,17 @@
 
         <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div class="p-4 rounded-lg border border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-bg">
-                <p class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Required keys (examples)</p>
+                <p class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Required keys</p>
                 <ul class="space-y-1 text-gray-600 dark:text-gray-400">
-                    <li><span class="font-mono">WHATSAPP_ENABLED</span> = True</li>
+                    <li><span class="font-mono">WHATSAPP_ENABLED</span> = true</li>
                     <li><span class="font-mono">WHATSAPP_PROVIDER</span> = twilio / gupshup / interakt</li>
-                    <li><span class="font-mono">TWILIO_ACCOUNT_SID</span>, <span class="font-mono">TWILIO_AUTH_TOKEN</span>, <span class="font-mono">TWILIO_WHATSAPP_NUMBER</span></li>
+                    {% if required_keys %}
+                        <li><span class="font-mono">{{ required_keys|join('</span>, <span class="font-mono">')|safe }}</span></li>
+                    {% endif %}
                 </ul>
+                {% if enabled and missing_keys %}
+                <p class="mt-3 text-sm text-red-600 dark:text-red-400">Missing: <span class="font-mono">{{ missing_keys|join(', ') }}</span></p>
+                {% endif %}
             </div>
             <div class="p-4 rounded-lg border border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-bg">
                 <p class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Security</p>

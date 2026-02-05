@@ -17,6 +17,7 @@ from app.models.accounting import (
 from app.models.purchasing import Vendor, PurchaseOrder, PurchaseOrderItem, VendorBill, VendorBillItem, VendorPayment
 from app.models.qc import QualityCheckTemplate, QualityCheckItem, BatchQualityCheck
 from app.models.settings import AppSettings, UserSettings
+from app.models.goods import Goods
 
 __all__ = [
     'User', 'Company', 'Distributor',
@@ -30,5 +31,6 @@ __all__ = [
     'ChartOfAccounts', 'FinancialYear',  # Aliases
     'Vendor', 'PurchaseOrder', 'PurchaseOrderItem', 'VendorBill', 'VendorBillItem', 'VendorPayment',
     'QualityCheckTemplate', 'QualityCheckItem', 'BatchQualityCheck',
-    'AppSettings', 'UserSettings'
+    'AppSettings', 'UserSettings',
+    'Goods'
 ]

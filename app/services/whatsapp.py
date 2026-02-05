@@ -29,6 +29,45 @@ class WhatsAppService:
         elif self.provider == 'interakt':
             self.api_key = current_app.config.get('INTERAKT_API_KEY')
             self.base_url = current_app.config.get('INTERAKT_BASE_URL', 'https://api.interakt.ai/v1')
+
+    def required_env_keys(self):
+        """Return the env vars required for the configured provider."""
+        if self.provider == 'twilio':
+            return ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_WHATSAPP_NUMBER']
+        if self.provider == 'gupshup':
+            return ['GUPSHUP_API_KEY', 'GUPSHUP_APP_NAME']
+        if self.provider == 'interakt':
+            return ['INTERAKT_API_KEY']
+        return []
+
+    def missing_env_keys(self):
+        """Return missing required env vars for the configured provider."""
+        def _is_blank(value):
+            return value is None or str(value).strip() == ''
+
+        missing = []
+        if self.provider == 'twilio':
+            if _is_blank(getattr(self, 'account_sid', None)):
+                missing.append('TWILIO_ACCOUNT_SID')
+            if _is_blank(getattr(self, 'auth_token', None)):
+                missing.append('TWILIO_AUTH_TOKEN')
+            if _is_blank(getattr(self, 'from_number', None)):
+                missing.append('TWILIO_WHATSAPP_NUMBER')
+        elif self.provider == 'gupshup':
+            if _is_blank(getattr(self, 'api_key', None)):
+                missing.append('GUPSHUP_API_KEY')
+            if _is_blank(getattr(self, 'app_name', None)):
+                missing.append('GUPSHUP_APP_NAME')
+        elif self.provider == 'interakt':
+            if _is_blank(getattr(self, 'api_key', None)):
+                missing.append('INTERAKT_API_KEY')
+        return missing
+
+    def is_configured(self):
+        """True if WhatsApp is enabled and all required provider keys are present."""
+        if not self.enabled:
+            return False
+        return len(self.missing_env_keys()) == 0
     
     def _format_phone(self, phone):
         """Format phone number for WhatsApp (remove spaces, add country code)"""
@@ -152,6 +191,10 @@ class WhatsAppService:
         if not self.enabled:
             logger.warning("WhatsApp is disabled in config")
             return False, "WhatsApp disabled"
+
+        missing = self.missing_env_keys()
+        if missing:
+            return False, f"Missing required config: {', '.join(missing)}"
         
         # Format phone number
         phone = self._format_phone(phone)

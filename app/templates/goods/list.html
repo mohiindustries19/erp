@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Goods Inventory - Mohi Industries ERP{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-white mb-1">Goods Inventory</h2>
+            <p class="text-gray-400 text-sm">Manage equipment, machinery, and assets</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('goods.add_goods') }}" 
+               class="bg-theme-primary hover:bg-theme-primary-hover text-white px-5 py-2.5 rounded-lg transition font-medium">
+                ➕ Add New Item
+            </a>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 mb-6">
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('goods.export_excel') }}" 
+               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                📊 Export Excel
+            </a>
+            <a href="{{ url_for('goods.print_goods') }}" target="_blank"
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                🖨️ Print
+            </a>
+            <button onclick="showEmailModal()" 
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                📧 Email
+            </button>
+            <button onclick="showWhatsAppModal()" 
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition font-medium">
+                📱 WhatsApp
+            </button>
+            <button onclick="document.getElementById('importFile').click()" 
+                    class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition font-medium">
+                📥 Import Excel
+            </button>
+        </div>
+        
+        <!-- Hidden file input for import -->
+        <form action="{{ url_for('goods.bulk_import') }}" method="POST" enctype="multipart/form-data" id="importForm">
+            <input type="file" id="importFile" name="file" accept=".xlsx,.xls" class="hidden" onchange="document.getElementById('importForm').submit()">
+        </form>
+    </div>
+
+    <!-- Goods Table -->
+    <div class="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-800">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Item #</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Quantity</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Condition</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800">
+                    {% for item in goods %}
+                    <tr class="hover:bg-gray-800 transition">
+                        <td class="px-6 py-4 text-white font-mono">#{{ item.item_number }}</td>
+                        <td class="px-6 py-4 text-white font-medium">{{ item.name }}</td>
+                        <td class="px-6 py-4 text-gray-300">{{ item.category or '-' }}</td>
+                        <td class="px-6 py-4 text-white">{{ item.quantity }} {{ item.unit }}</td>
+                        <td class="px-6 py-4 text-gray-300">{{ item.location or '-' }}</td>
+                        <td class="px-6 py-4">
+                            {% if item.condition == 'good' %}
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">Good</span>
+                            {% elif item.condition == 'fair' %}
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-900 text-yellow-300 border border-yellow-700">Fair</span>
+                            {% elif item.condition == 'poor' %}
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-orange-900 text-orange-300 border border-orange-700">Poor</span>
+                            {% else %}
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">Damaged</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('goods.view_goods', id=item.id) }}" 
+                                   class="text-blue-400 hover:text-blue-300 transition" title="View">
+                                    👁️
+                                </a>
+                                <a href="{{ url_for('goods.edit_goods', id=item.id) }}" 
+                                   class="text-yellow-400 hover:text-yellow-300 transition" title="Edit">
+                                    ✏️
+                                </a>
+                                <form action="{{ url_for('goods.delete_goods', id=item.id) }}" method="POST" class="inline" 
+                                      onsubmit="return confirm('Delete this item?')">
+                                    <button type="submit" class="text-red-400 hover:text-red-300 transition" title="Delete">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                            No goods items found. Click "Add New Item" to get started.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-6 bg-gray-900 rounded-lg border border-gray-800 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <p class="text-gray-400 text-sm">Total Items</p>
+                <p class="text-2xl font-bold text-white">{{ goods|length }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm">Good Condition</p>
+                <p class="text-2xl font-bold text-green-400">{{ goods|selectattr('condition', 'equalto', 'good')|list|length }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm">Fair Condition</p>
+                <p class="text-2xl font-bold text-yellow-400">{{ goods|selectattr('condition', 'equalto', 'fair')|list|length }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm">Needs Attention</p>
+                <p class="text-2xl font-bold text-red-400">{{ (goods|selectattr('condition', 'equalto', 'poor')|list|length) + (goods|selectattr('condition', 'equalto', 'damaged')|list|length) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-white mb-4">📧 Email Inventory Report</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Email Address</label>
+                <input type="email" id="emailInput" 
+                       class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                       placeholder="recipient@example.com">
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="closeEmailModal()" 
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition">
+                    Cancel
+                </button>
+                <button onclick="sendEmail()" 
+                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                    Send Email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WhatsApp Modal -->
+<div id="whatsappModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-white mb-4">📱 Send via WhatsApp</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Phone Number</label>
+                <input type="tel" id="phoneInput" 
+                       class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                       placeholder="+91 9876543210">
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="closeWhatsAppModal()" 
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition">
+                    Cancel
+                </button>
+                <button onclick="sendWhatsApp()" 
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                    Send WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showEmailModal() {
+    document.getElementById('emailModal').classList.remove('hidden');
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+}
+
+function showWhatsAppModal() {
+    document.getElementById('whatsappModal').classList.remove('hidden');
+}
+
+function closeWhatsAppModal() {
+    document.getElementById('whatsappModal').classList.add('hidden');
+}
+
+async function sendEmail() {
+    const email = document.getElementById('emailInput').value;
+    if (!email) {
+        alert('Please enter an email address');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('email', email);
+        
+        const response = await fetch('{{ url_for("goods.email_goods") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+            closeEmailModal();
+        }
+    } catch (error) {
+        alert('Error sending email: ' + error.message);
+    }
+}
+
+async function sendWhatsApp() {
+    const phone = document.getElementById('phoneInput').value;
+    if (!phone) {
+        alert('Please enter a phone number');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('phone', phone);
+        
+        const response = await fetch('{{ url_for("goods.whatsapp_goods") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+            closeWhatsAppModal();
+        }
+    } catch (error) {
+        alert('Error sending WhatsApp: ' + error.message);
+    }
+}
+
+// Close modals on outside click
+document.getElementById('emailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEmailModal();
+});
+
+document.getElementById('whatsappModal').addEventListener('click', function(e) {
+    if (e.target === this) closeWhatsAppModal();
+});
+</script>
+
+<style>
+.bg-theme-primary {
+    background-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary-hover:hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+</style>
+{% endblock %}

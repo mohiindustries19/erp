@@ -17,6 +17,8 @@ bp = Blueprint('whatsapp', __name__, url_prefix='/whatsapp')
 def dashboard():
     """WhatsApp dashboard"""
     service = WhatsAppService()
+    missing_keys = service.missing_env_keys()
+    configured = service.is_configured()
     
     # Get statistics
     total_distributors = Distributor.query.filter_by(status='active').count()
@@ -30,6 +32,8 @@ def dashboard():
     return render_template('whatsapp/dashboard.html',
                          enabled=service.enabled,
                          provider=service.provider,
+                         configured=configured,
+                         missing_keys=missing_keys,
                          total_distributors=total_distributors,
                          recent_orders=recent_orders,
                          pending_payments=pending_payments)
@@ -279,6 +283,13 @@ def test_message():
     """Send test message to verify WhatsApp configuration"""
     try:
         service = WhatsAppService()
+
+        if not service.enabled:
+            return jsonify({'success': False, 'error': 'WhatsApp is disabled. Enable WHATSAPP_ENABLED=true in environment variables.'})
+
+        missing = service.missing_env_keys()
+        if missing:
+            return jsonify({'success': False, 'error': f"Missing required config: {', '.join(missing)}"})
         
         phone = request.form.get('phone')
         if not phone:
@@ -324,10 +335,13 @@ def settings():
         return redirect(url_for('whatsapp.settings'))
     
     service = WhatsAppService()
-    
+
     return render_template('whatsapp/settings.html',
                          enabled=service.enabled,
-                         provider=service.provider)
+                         provider=service.provider,
+                         configured=service.is_configured(),
+                         missing_keys=service.missing_env_keys(),
+                         required_keys=service.required_env_keys())
 
 
 # API endpoint for webhook (to receive messages from WhatsApp)

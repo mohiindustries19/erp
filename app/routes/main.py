@@ -1,6 +1,6 @@
 """Main Routes - Dashboard"""
 
-from flask import Blueprint, render_template, send_from_directory
+from flask import Blueprint, render_template, send_from_directory, redirect, url_for
 from flask_login import login_required
 from app.models import Order, Distributor, Product, Inventory, Payment
 from app import db
@@ -10,6 +10,11 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 bp = Blueprint('main', __name__)
+
+
+@bp.route('/login')
+def login_redirect():
+    return redirect(url_for('auth.login'))
 
 
 @bp.route('/health')
