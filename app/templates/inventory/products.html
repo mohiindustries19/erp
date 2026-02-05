@@ -4,19 +4,31 @@
 
 {% block content %}
 <div class="flex justify-between items-center mb-6">
-    <h2 class="text-3xl font-bold text-text-primary">Products</h2>
+    <h2 class="text-3xl font-bold text-text-primary">Products Catalog</h2>
     <div class="flex space-x-2">
-        <a href="{{ url_for('barcode.bulk_generate_page') }}"
-            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg shadow-lg shadow-purple-500/30 transition-all font-medium">
-            📊 Bulk Barcodes
-        </a>
         <a href="{{ url_for('inventory.export_products_excel') }}"
-            class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg shadow-lg shadow-emerald-500/30 transition-all font-medium">
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-medium">
             📊 Export Excel
         </a>
+        <a href="{{ url_for('inventory.print_products') }}" target="_blank"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium">
+            🖨️ Print
+        </a>
+        <button onclick="showEmailModal()" 
+                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition font-medium">
+            📧 Email
+        </button>
+        <button onclick="showWhatsAppModal()" 
+                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition font-medium">
+            📱 WhatsApp
+        </button>
+        <a href="{{ url_for('barcode.bulk_generate_page') }}"
+            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition font-medium">
+            📊 Barcodes
+        </a>
         <a href="{{ url_for('inventory.add_product') }}"
-            class="bg-brand-primary hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow-lg shadow-red-500/30 transition-all font-medium">
-            + Add Product
+            class="bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-lg transition font-medium">
+            ➕ Add Product
         </a>
     </div>
 </div>
@@ -72,4 +84,144 @@
         </div>
     </div>
 </div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-white mb-4">📧 Email Products Report</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Email Address</label>
+                <input type="email" id="emailInput" 
+                       class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                       placeholder="recipient@example.com">
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="closeEmailModal()" 
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition">
+                    Cancel
+                </button>
+                <button onclick="sendEmail()" 
+                        class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                    Send Email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WhatsApp Modal -->
+<div id="whatsappModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
+    <div class="bg-gray-900 rounded-lg border border-gray-800 p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-white mb-4">📱 Send via WhatsApp</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Phone Number</label>
+                <input type="tel" id="phoneInput" 
+                       class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                       placeholder="+91 9876543210">
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="closeWhatsAppModal()" 
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition">
+                    Cancel
+                </button>
+                <button onclick="sendWhatsApp()" 
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg transition font-semibold">
+                    Send WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showEmailModal() {
+    document.getElementById('emailModal').classList.remove('hidden');
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+}
+
+function showWhatsAppModal() {
+    document.getElementById('whatsappModal').classList.remove('hidden');
+}
+
+function closeWhatsAppModal() {
+    document.getElementById('whatsappModal').classList.add('hidden');
+}
+
+async function sendEmail() {
+    const email = document.getElementById('emailInput').value;
+    if (!email) {
+        alert('Please enter an email address');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('email', email);
+        
+        const response = await fetch('{{ url_for("inventory.email_products") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+            closeEmailModal();
+        }
+    } catch (error) {
+        alert('Error sending email: ' + error.message);
+    }
+}
+
+async function sendWhatsApp() {
+    const phone = document.getElementById('phoneInput').value;
+    if (!phone) {
+        alert('Please enter a phone number');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('phone', phone);
+        
+        const response = await fetch('{{ url_for("inventory.whatsapp_products") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+            closeWhatsAppModal();
+        }
+    } catch (error) {
+        alert('Error sending WhatsApp: ' + error.message);
+    }
+}
+
+// Close modals on outside click
+document.getElementById('emailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEmailModal();
+});
+
+document.getElementById('whatsappModal').addEventListener('click', function(e) {
+    if (e.target === this) closeWhatsAppModal();
+});
+</script>
+
+<style>
+.bg-theme-primary {
+    background-color: var(--theme-primary) !important;
+}
+.hover\:bg-theme-primary-hover:hover {
+    background-color: var(--theme-primary-hover) !important;
+}
+</style>
 {% endblock %}
