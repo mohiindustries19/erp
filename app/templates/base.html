@@ -136,6 +136,7 @@
                 <p class="px-2 text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">Inventory</p>
                 <a href="{{ url_for('inventory.list_products') }}" class="nav-link {% if 'inventory.list_products' in request.endpoint %}active{% endif %}">Products</a>
                 <a href="{{ url_for('inventory.list_inventory') }}" class="nav-link {% if 'inventory.list_inventory' in request.endpoint %}active{% endif %}">Inventory & Batches</a>
+                <a href="{{ url_for('goods.list_goods') }}" class="nav-link {% if 'goods' in request.endpoint %}active{% endif %}">📦 Goods Inventory</a>
                 <a href="{{ url_for('qc.batches') }}" class="nav-link {% if 'qc' in request.endpoint %}active{% endif %}">Quality Control</a>
 
                 <div class="my-3 border-t border-border-subtle"></div>
